@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Service = require('../src/models/service');
-require('dotenv').config();
+const mongoose = require('mongoose')
+const Service = require('../src/models/service')  // Add /src/ to the path
+require('dotenv').config()
 
 const services = [
   {
@@ -9,7 +9,7 @@ const services = [
     category: 'Music',
     price: 49.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=Spotify',
+    imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=200&fit=crop&crop=center',
   },
   {
     name: 'Netflix Basic',
@@ -17,7 +17,7 @@ const services = [
     category: 'Entertainment',
     price: 99.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=Netflix',
+    imageUrl: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=200&fit=crop&crop=center',
   },
   {
     name: 'Showmax',
@@ -25,7 +25,7 @@ const services = [
     category: 'Entertainment',
     price: 79.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=Showmax',
+    imageUrl: 'https://images.unsplash.com/photo-1489599735734-79b4d4c4b5b?w=400&h=200&fit=crop&crop=center',
   },
   {
     name: 'DSTV Compact',
@@ -33,7 +33,7 @@ const services = [
     category: 'TV',
     price: 299.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=DSTV',
+    imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=200&fit=crop&crop=center',
   },
   {
     name: 'Xbox Game Pass',
@@ -41,7 +41,7 @@ const services = [
     category: 'Gaming',
     price: 149.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=Xbox',
+    imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=200&fit=crop&crop=center',
   },
   {
     name: 'News24 Premium',
@@ -49,7 +49,7 @@ const services = [
     category: 'News',
     price: 29.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=News24',
+    imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=200&fit=crop&crop=center',
   },
   {
     name: 'SuperSport',
@@ -57,7 +57,7 @@ const services = [
     category: 'Sports',
     price: 199.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=SuperSport',
+    imageUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&h=200&fit=crop&crop=center',
   },
   {
     name: 'Audible',
@@ -65,28 +65,31 @@ const services = [
     category: 'Education',
     price: 59.99,
     billingCycle: 'monthly',
-    imageUrl: 'https://via.placeholder.com/150?text=Audible',
+    imageUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center',
   },
-];
+]
 
-const seedServices = async () => {
+async function seedServices() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    await mongoose.connect(process.env.MONGODB_URI)
+    console.log('Connected to MongoDB')
 
-    const existingServices = await Service.countDocuments();
-    if (existingServices > 0) {
-      console.log('Services already seeded');
-      return;
+    // Update existing services or insert new ones
+    for (const serviceData of services) {
+      await Service.findOneAndUpdate(
+        { name: serviceData.name }, // Find by name
+        serviceData, // Update with new data
+        { upsert: true, new: true } // Create if doesn't exist
+      )
     }
 
-    await Service.insertMany(services);
-    console.log('Services seeded successfully');
+    console.log('Services updated successfully')
   } catch (error) {
-    console.error('Seeding failed:', error);
+    console.error('Error seeding services:', error)
   } finally {
-    mongoose.connection.close();
+    await mongoose.connection.close()
+    console.log('Database connection closed')
   }
-};
+}
 
-seedServices();
+seedServices()
