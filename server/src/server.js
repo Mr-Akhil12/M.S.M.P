@@ -75,12 +75,20 @@ app.use(express.json());
 const subscriptionsController = require('./controllers/subscriptions');
 subscriptionsController.initializeSocket(io);
 
-// API Routes
-app.use('/auth', require('./routes/auth'));
-app.use('/services', require('./routes/services'));
-app.use('/subscriptions', require('./routes/subscriptions'));
-app.use('/transactions', require('./routes/transactions'));
-app.use('/admin', require('./routes/admin'));
+// API Routes (with /api prefix)
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/services', require('./routes/services'));
+app.use('/api/subscriptions', require('./routes/subscriptions'));
+app.use('/api/transactions', require('./routes/transactions'));
+app.use('/api/admin', require('./routes/admin'));
+
+// Health check (no prefix)
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString() 
+  });
+});
 
 // Global error handler (must be last)
 app.use(errorHandler);
