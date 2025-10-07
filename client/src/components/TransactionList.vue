@@ -101,7 +101,7 @@ const fetchTransactions = async () => {
   loading.value = true
   error.value = ''
   try {
-    const response = await api.get('/api/transactions')
+    const response = await api.get('/transactions')
     transactions.value = response.data.transactions || []
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load transactions'
