@@ -88,9 +88,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import api from '../services/api'
+import { useSocket } from '../composables/useSocket'
 
+const { socket } = useSocket()
 const transactions = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -99,7 +101,7 @@ const fetchTransactions = async () => {
   loading.value = true
   error.value = ''
   try {
-    const response = await api.get('/transactions')
+    const response = await api.get('/api/transactions')
     transactions.value = response.data.transactions || []
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load transactions'
@@ -130,8 +132,35 @@ const getStatusClass = (status) => {
     : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
 }
 
+// Socket.IO event listeners
+const setupSocketListeners = () => {
+  if (!socket.value) return
+
+  socket.value.on('subscription:created', () => {
+    console.log('🔄 Transaction: Subscription created - refreshing...')
+    fetchTransactions()
+  })
+
+  socket.value.on('subscription:cancelled', () => {
+    console.log('🔄 Transaction: Subscription cancelled - refreshing...')
+    fetchTransactions()
+  })
+}
+
+const cleanupSocketListeners = () => {
+  if (!socket.value) return
+
+  socket.value.off('subscription:created')
+  socket.value.off('subscription:cancelled')
+}
+
 onMounted(() => {
   fetchTransactions()
+  setupSocketListeners()
+})
+
+onUnmounted(() => {
+  cleanupSocketListeners()
 })
 
 // Expose fetchTransactions so parent can call it
