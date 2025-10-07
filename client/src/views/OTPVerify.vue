@@ -1,6 +1,4 @@
-// filepath: client/src/views/OTPVerify.vue
 <template>
-  <!-- Container centered by App.vue main -->
   <section class="w-full items-center justify-center px-4 py-4 sm:px-6 lg:px-8 min-h-screen flex">
     <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-md">
       <!-- Header -->
@@ -86,39 +84,37 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useAppToast } from '../composables/useToast'
 import api from '../services/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { showSuccess, showError } = useAppToast()
 
 const otp = ref('')
 const loading = ref(false)
 const error = ref('')
 const success = ref(false)
-const timeRemaining = ref(300) // 5 minutes in seconds
+const timeRemaining = ref(300) // 5 minutes
 const resendDisabled = ref(false)
 const resendCountdown = ref(0)
 
 let countdownInterval = null
 let resendInterval = null
 
-// Get MSISDN from localStorage
 const msisdn = localStorage.getItem('tempMsisdn') || ''
 
-// Mask MSISDN for display (e.g., 278****5678)
 const maskedMsisdn = computed(() => {
   if (!msisdn) return 'your number'
   return msisdn.substring(0, 3) + '****' + msisdn.substring(msisdn.length - 4)
 })
 
-// Format time as MM:SS
 const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-// Start countdown timer
 const startCountdown = () => {
   countdownInterval = setInterval(() => {
     timeRemaining.value--
@@ -129,7 +125,6 @@ const startCountdown = () => {
   }, 1000)
 }
 
-// Handle OTP verification
 const handleVerifyOTP = async () => {
   if (!msisdn) {
     error.value = 'Session expired. Please start again.'
@@ -151,14 +146,12 @@ const handleVerifyOTP = async () => {
       otp: otp.value
     })
 
-    // Login successful
     success.value = true
     authStore.login(response.data.token, response.data.user)
-    
-    // Clear temp MSISDN
     localStorage.removeItem('tempMsisdn')
+    
+    showSuccess('Successfully signed in!')
 
-    // Redirect to dashboard after short delay
     setTimeout(() => {
       router.push('/dashboard')
     }, 1000)
@@ -170,16 +163,13 @@ const handleVerifyOTP = async () => {
     } else {
       error.value = 'Verification failed. Please try again.'
     }
-    console.error('Verify OTP error:', err)
-    
-    // Clear OTP input on error
+    showError(error.value)
     otp.value = ''
   } finally {
     loading.value = false
   }
 }
 
-// Handle resend OTP
 const handleResendOTP = async () => {
   if (!msisdn) {
     error.value = 'Session expired. Please start again.'
@@ -193,10 +183,7 @@ const handleResendOTP = async () => {
   try {
     await api.post('/auth/send-otp', { msisdn: msisdn })
     
-    // Reset timer
     timeRemaining.value = 300
-    
-    // Start resend cooldown (60 seconds)
     resendDisabled.value = true
     resendCountdown.value = 60
     
@@ -208,24 +195,20 @@ const handleResendOTP = async () => {
       }
     }, 1000)
     
-    // Clear OTP input
     otp.value = ''
-    
-    // Show success message
-    alert('New OTP sent successfully!')
+    showSuccess('New OTP sent successfully!')
   } catch (err) {
     if (err.response?.status === 429) {
       error.value = 'Too many requests. Please try again in 15 minutes.'
     } else {
       error.value = 'Failed to resend OTP. Please try again.'
     }
-    console.error('Resend OTP error:', err)
+    showError(error.value)
   } finally {
     loading.value = false
   }
 }
 
-// Check if MSISDN exists on mount
 onMounted(() => {
   if (!msisdn) {
     router.push('/')
@@ -234,7 +217,6 @@ onMounted(() => {
   startCountdown()
 })
 
-// Cleanup on unmount
 onUnmounted(() => {
   if (countdownInterval) clearInterval(countdownInterval)
   if (resendInterval) clearInterval(resendInterval)

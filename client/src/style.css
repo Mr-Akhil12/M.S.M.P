@@ -84,13 +84,13 @@ html {
 .animated-gradient {
   background: linear-gradient(-45deg, #86b4ff 0%, #ffffff 100%);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  animation: gradientShift 10s linear infinite;
 }
 
 .dark .animated-gradient {
   background: linear-gradient(-45deg, #000f43 0%, #5c5c5c 100%);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  animation: gradientShift 10s linear infinite;
 }
 
 @keyframes gradientShift {

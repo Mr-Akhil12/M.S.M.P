@@ -1,5 +1,8 @@
 const Transaction = require('../models/Transaction');
 
+/**
+ * Get paginated transaction history for authenticated user
+ */
 const getTransactions = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -20,8 +23,8 @@ const getTransactions = async (req, res) => {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit),
-      },
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch transactions' });

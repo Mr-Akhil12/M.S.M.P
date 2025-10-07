@@ -3,13 +3,13 @@ import { useAuthStore } from '../stores/auth'
 import router from '../router'
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 })
 
-// Request interceptor: Add auth token to headers
+// Attach JWT token to every request
 api.interceptors.request.use(
   (config) => {
     const authStore = useAuthStore()
@@ -18,26 +18,18 @@ api.interceptors.request.use(
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// Response interceptor: Handle errors globally
+// Handle 401 errors globally (logout on expired token)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid - logout and redirect
       const authStore = useAuthStore()
       authStore.logout()
       router.push('/')
     }
-    
-    // Extract error message
-    const message = error.response?.data?.message || 'An error occurred'
-    console.error('API Error:', message)
-    
     return Promise.reject(error)
   }
 )

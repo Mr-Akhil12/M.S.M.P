@@ -103,7 +103,6 @@ const fetchTransactions = async () => {
     transactions.value = response.data.transactions || []
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load transactions'
-    console.error('Fetch transactions error:', err)
   } finally {
     loading.value = false
   }
@@ -133,5 +132,10 @@ const getStatusClass = (status) => {
 
 onMounted(() => {
   fetchTransactions()
+})
+
+// Expose fetchTransactions so parent can call it
+defineExpose({
+  fetchTransactions
 })
 </script>

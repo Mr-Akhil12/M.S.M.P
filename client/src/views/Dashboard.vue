@@ -1,4 +1,3 @@
-// filepath: client/src/views/Dashboard.vue
 <template>
   <!-- Container centered by App.vue main -->
   <section class="w-full items-center justify-center px-0 py-16 sm:px-6 lg:px-8 min-h-screen min-w-screen flex">
@@ -7,6 +6,10 @@
       <div class="text-center mb-6 sm:mb-8">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Dashboard</h1>
         <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Welcome back, {{ authStore.user?.msisdn }}</p>
+        <!-- Connection Status Indicator (Optional) -->
+        <span class="text-xs" :class="isConnected ? 'text-green-600' : 'text-red-600'">
+          {{ isConnected ? '🟢 Connected' : '🔴 Disconnected' }}
+        </span>
       </div>
 
       <!-- Error Banner -->
@@ -102,14 +105,23 @@
       <!-- Transaction History Section -->
       <section class="mb-6">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Transaction History</h2>
-        <TransactionList class="transform transition-all duration-300" />
+        <TransactionList ref="transactionListRef" class="transform transition-all duration-300" />
       </section>
 
       <!-- Logout Button -->
       <div class="text-center">
         <button
+          @click="$router.push('/admin')"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-4"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Admin Dashboard
+        </button>
+        <button
           @click="handleLogout"
-          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -131,14 +143,17 @@ import ServiceCard from '../components/ServiceCard.vue'
 import SubscriptionCard from '../components/SubscriptionCard.vue'
 import TransactionList from '../components/TransactionList.vue'
 import { useAppToast } from '../composables/useToast'
+import { useSocket } from '../composables/useSocket'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const servicesStore = useServicesStore()
 const subscriptionsStore = useSubscriptionsStore()
-const { showSuccess, showError } = useAppToast()
+const { showSuccess, showError, showInfo } = useAppToast()
+const { socket, isConnected } = useSocket()
 
 const globalError = ref('')
+const transactionListRef = ref(null)
 
 // Check if user is subscribed to a service
 const isSubscribed = (serviceId) => {
@@ -186,6 +201,7 @@ const refreshServices = async () => {
 const handleLogout = () => {
   if (confirm('Are you sure you want to logout?')) {
     authStore.logout()
+    showInfo('You have been logged out')
     router.push('/')
   }
 }
@@ -196,5 +212,22 @@ onMounted(async () => {
     servicesStore.fetchServices(),
     subscriptionsStore.fetchSubscriptions()
   ])
+
+  // Real-time updates via Socket.IO
+  if (socket.value) {
+    socket.value.on('subscription:created', () => {
+      subscriptionsStore.fetchSubscriptions()
+      if (transactionListRef.value?.fetchTransactions) {
+        transactionListRef.value.fetchTransactions()
+      }
+    })
+
+    socket.value.on('subscription:cancelled', () => {
+      subscriptionsStore.fetchSubscriptions()
+      if (transactionListRef.value?.fetchTransactions) {
+        transactionListRef.value.fetchTransactions()
+      }
+    })
+  }
 })
 </script>

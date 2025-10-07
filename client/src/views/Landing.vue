@@ -54,9 +54,12 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAppToast } from '../composables/useToast'
 import api from '../services/api'
 
 const router = useRouter()
+const { showSuccess, showError } = useAppToast()
+
 const msisdn = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -65,18 +68,22 @@ const isValidMSISDN = computed(() => /^27\d{9}$/.test(msisdn.value))
 
 const sendOTP = async () => {
   error.value = ''
+  
   if (!isValidMSISDN.value) {
     error.value = 'Please enter a valid South African mobile number (e.g., 27812345678)'
     return
   }
+  
   loading.value = true
+  
   try {
     await api.post('/auth/send-otp', { msisdn: msisdn.value })
     localStorage.setItem('tempMsisdn', msisdn.value)
+    showSuccess('OTP sent successfully! Check your phone/terminal.')
     router.push('/verify-otp')
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to send OTP. Please try again.'
-    console.error('Send OTP error:', err)
+    showError(error.value)
   } finally {
     loading.value = false
   }
