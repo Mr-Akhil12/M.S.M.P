@@ -4,33 +4,34 @@ Complete API reference for the Mobile Subscription Management Portal backend.
 
 ---
 
-## 🔗 Base URL
+## 🌐 Base URLs
 
-```
-https://your-backend.onrender.com
-```
+- **Local Development:** `http://localhost:5000/api`
+- **Production:** `https://m-s-m-p.onrender.com/api`
+
+**Note:** The health check endpoint (`/health`) does NOT use the `/api` prefix.
 
 ---
 
 ## 🔐 Authentication
 
-All API endpoints (except `/auth/send-otp` and `/auth/verify-otp`) require authentication.
+Most endpoints require JWT authentication.
 
-**Headers:**
+### Request Header
 
-```
-Authorization: Bearer <jwt_token>
+```http
+Authorization: Bearer <your-jwt-token>
 ```
 
 ---
 
-## 📱 Authentication Endpoints
+## 🔑 Authentication Endpoints
 
-### Send OTP
+### 1. Send OTP
 
-**POST** `/auth/send-otp`
+Request an OTP to be sent via SMS.
 
-Send OTP to user's mobile number for authentication.
+**Endpoint:** `POST /api/auth/send-otp`
 
 **Request Body:**
 
@@ -59,11 +60,11 @@ Send OTP to user's mobile number for authentication.
 - `429`: Rate limit exceeded
 - `500`: SMS service error
 
-### Verify OTP
+### 2. Verify OTP
 
-**POST** `/auth/verify-otp`
+Verify OTP and receive JWT token.
 
-Verify OTP and return JWT token.
+**Endpoint:** `POST /api/auth/verify-otp`
 
 **Request Body:**
 
@@ -100,13 +101,13 @@ Verify OTP and return JWT token.
 
 ---
 
-## 📊 Services Endpoints
+## 📦 Service Endpoints
 
-### Get All Services
-
-**GET** `/services`
+### 3. Get All Services
 
 Retrieve all available services.
+
+**Endpoint:** `GET /api/services`
 
 **Response (200):**
 
@@ -158,13 +159,13 @@ Retrieve specific service details.
 
 ---
 
-## 📋 Subscriptions Endpoints
+## 📝 Subscription Endpoints
 
-### Get User Subscriptions
+### 4. Get User Subscriptions
 
-**GET** `/subscriptions`
+Retrieve all active subscriptions for authenticated user.
 
-Get all subscriptions for authenticated user.
+**Endpoint:** `GET /api/subscriptions`
 
 **Response (200):**
 
@@ -190,11 +191,11 @@ Get all subscriptions for authenticated user.
 }
 ```
 
-### Subscribe to Service
+### 5. Subscribe to Service
 
-**POST** `/subscriptions`
+Create a new subscription.
 
-Subscribe user to a service.
+**Endpoint:** `POST /api/subscriptions`
 
 **Request Body:**
 
@@ -233,11 +234,11 @@ Subscribe user to a service.
 - `400`: Already subscribed or insufficient balance
 - `404`: Service not found
 
-### Unsubscribe from Service
+### 6. Cancel Subscription
 
-**DELETE** `/subscriptions/:id`
+Cancel an active subscription.
 
-Cancel user's subscription.
+**Endpoint:** `DELETE /api/subscriptions/:serviceId`
 
 **Response (200):**
 
@@ -282,13 +283,13 @@ Update subscription settings.
 
 ---
 
-## 💳 Transactions Endpoints
+## 💰 Transaction Endpoints
 
-### Get User Transactions
+### 7. Get User Transactions
 
-**GET** `/transactions`
+Retrieve transaction history for authenticated user.
 
-Get transaction history for authenticated user.
+**Endpoint:** `GET /api/transactions`
 
 **Query Parameters:**
 
@@ -353,169 +354,13 @@ Get specific transaction details.
 
 ---
 
-## 👨‍� Admin Endpoints
+## 👨‍💼 Admin Endpoints
 
-_Requires admin authentication_
+### 8. Verify Admin Password
 
-### Get Dashboard Stats
+Verify admin password to access admin dashboard.
 
-**GET** `/admin/stats`
-
-Get system statistics.
-
-**Response (200):**
-
-```json
-{
-  "success": true,
-  "data": {
-    "totalUsers": 1250,
-    "totalSubscriptions": 890,
-    "totalRevenue": 267100,
-    "activeSubscriptions": 756,
-    "recentTransactions": 45,
-    "topServices": [
-      {
-        "name": "Netflix Premium",
-        "subscriptions": 234
-      }
-    ]
-  }
-}
-```
-
-### Get All Users
-
-**GET** `/admin/users`
-
-Get all registered users.
-
-**Query Parameters:**
-
-- `limit` (optional): Number of users (default: 20)
-- `offset` (optional): Skip users (default: 0)
-
-**Response (200):**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "user_id",
-      "msisdn": "27812345678",
-      "telco": "Vodacom",
-      "subscriptionsCount": 3,
-      "totalSpent": 897,
-      "createdAt": "2025-01-07T10:00:00.000Z",
-      "lastLogin": "2025-01-07T15:30:00.000Z"
-    }
-  ],
-  "pagination": {
-    "total": 1250,
-    "limit": 20,
-    "offset": 0,
-    "hasMore": true
-  }
-}
-```
-
-### Get All Subscriptions
-
-**GET** `/admin/subscriptions`
-
-Get all subscriptions in system.
-
-**Query Parameters:**
-
-- `status` (optional): Filter by status (`active`, `cancelled`, `expired`)
-- `limit` (optional): Number of subscriptions (default: 20)
-- `offset` (optional): Skip subscriptions (default: 0)
-
-**Response (200):**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "sub_id",
-      "user": {
-        "id": "user_id",
-        "msisdn": "27812345678"
-      },
-      "service": {
-        "id": "service_id",
-        "name": "Netflix Premium",
-        "price": 299
-      },
-      "status": "active",
-      "startDate": "2025-01-07T10:00:00.000Z",
-      "endDate": "2025-02-07T10:00:00.000Z",
-      "autoRenew": true,
-      "createdAt": "2025-01-07T10:00:00.000Z"
-    }
-  ],
-  "pagination": {
-    "total": 890,
-    "limit": 20,
-    "offset": 0,
-    "hasMore": true
-  }
-}
-```
-
-### Get All Transactions
-
-**GET** `/admin/transactions`
-
-Get all transactions in system.
-
-**Query Parameters:**
-
-- `type` (optional): Filter by type (`subscription`, `refund`)
-- `status` (optional): Filter by status (`pending`, `completed`, `failed`)
-- `limit` (optional): Number of transactions (default: 20)
-- `offset` (optional): Skip transactions (default: 0)
-
-**Response (200):**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "txn_id",
-      "user": {
-        "id": "user_id",
-        "msisdn": "27812345678"
-      },
-      "type": "subscription",
-      "amount": 299,
-      "currency": "ZAR",
-      "status": "completed",
-      "description": "Netflix Premium subscription",
-      "service": {
-        "id": "service_id",
-        "name": "Netflix Premium"
-      },
-      "createdAt": "2025-01-07T10:00:00.000Z"
-    }
-  ],
-  "pagination": {
-    "total": 2340,
-    "limit": 20,
-    "offset": 0,
-    "hasMore": true
-  }
-}
-```
-
-### Admin Login
-
-**POST** `/admin/login`
-
-Authenticate admin user.
+**Endpoint:** `POST /api/admin/verify-password`
 
 **Request Body:**
 
@@ -538,6 +383,53 @@ Authenticate admin user.
       "role": "admin",
       "createdAt": "2025-01-07T10:00:00.000Z"
     }
+  }
+}
+```
+
+### 9. Get Admin Statistics
+
+Retrieve platform-wide statistics.
+
+**Endpoint:** `GET /api/admin/stats`
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalUsers": 1250,
+    "totalSubscriptions": 890,
+    "totalRevenue": 267100,
+    "activeSubscriptions": 756,
+    "recentTransactions": 45,
+    "topServices": [
+      {
+        "name": "Netflix Premium",
+        "subscriptions": 234
+      }
+    ]
+  }
+}
+```
+
+### 10. Get User Statistics
+
+Retrieve user-level impact statistics.
+
+**Endpoint:** `GET /api/admin/user-stats`
+
+**Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalActiveSubscriptions": 756,
+    "totalRevenue": 267100,
+    "monthlyGrowth": 12.5,
+    "churnRate": 5.3
   }
 }
 ```

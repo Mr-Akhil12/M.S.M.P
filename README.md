@@ -251,15 +251,17 @@ EASYSENDSMS_SENDER_ID=YourBrand
 
 ### Base URL
 
-- Local: `http://localhost:5000/api`
-- Production: `https://your-backend.onrender.com/api`
+- **Local:** `http://localhost:5000/api`
+- **Production:** `https://m-s-m-p.onrender.com/api`
+
+**Note:** Health check endpoint is at `/health` (no `/api` prefix)
 
 ### Authentication Endpoints
 
 #### Send OTP
 
 ```http
-POST /auth/send-otp
+POST /api/auth/send-otp
 Content-Type: application/json
 
 {
@@ -694,6 +696,7 @@ For issues, questions, or feedback:
 
 - Phone: 067 865 9396
 - Email: pillayakhil2@gmail.com
+
 ---
 
 ## 🎯 Live Demo

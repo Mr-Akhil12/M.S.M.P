@@ -141,7 +141,7 @@ Add each variable:
 Open in browser:
 
 ```
-https://msmp-api.onrender.com/health
+https://m-s-m-p.onrender.com/health
 ```
 
 **Expected response:**
@@ -149,8 +149,16 @@ https://msmp-api.onrender.com/health
 ```json
 {
   "status": "OK",
-  "timestamp": "2025-01-07T..."
+  "timestamp": "2025-01-08T..."
 }
+```
+
+**Test API endpoint with cURL:**
+
+```bash
+curl -X POST https://m-s-m-p.onrender.com/api/auth/send-otp \
+  -H "Content-Type: application/json" \
+  -d '{"msisdn":"27812345678"}'
 ```
 
 ✅ **Backend deployment complete!**
