@@ -89,7 +89,7 @@ git push origin main
 
 1. Click **"New +"** → **"Web Service"**
 2. Connect your GitHub repository
-3. Click **"Connect"** next to your `msmp` repository
+3. Click **"Connect"** next to your `M.S.M.P` repository
 
 ### Step 4: Configure Service
 
@@ -100,13 +100,15 @@ git push origin main
 - **Branch:** `main`
 - **Root Directory:** `server`
 - **Environment:** `Node`
-- **Build Command:** `npm install`
+- **Build Command:** `rm -rf node_modules package-lock.json && npm install`
 - **Start Command:** `npm start`
 
 **Instance Type:**
 
 - Select **"Free"** (for testing/demo)
 - Or **"Starter"** ($7/month) for production
+
+> **⚠️ Important:** The build command `rm -rf node_modules package-lock.json && npm install` ensures a clean installation on every deploy, preventing corrupted dependency issues that can occur with Render's build cache.
 
 ### Step 5: Add Environment Variables
 
@@ -126,6 +128,7 @@ Add each variable:
 | `SMS_ENABLED`           | `false`                                          |
 | `NODE_ENV`              | `production`                                     |
 | `PORT`                  | `5000`                                           |
+| `NODE_VERSION`          | `18`                                             |
 
 ### Step 6: Deploy
 
@@ -185,7 +188,7 @@ git push origin main
 ### Step 4: Import Project
 
 1. Click **"Add New..."** → **"Project"**
-2. Find your `msmp` repository → Click **"Import"**
+2. Find your `M.S.M.P` repository → Click **"Import"**
 
 ### Step 5: Configure Project
 
@@ -306,6 +309,18 @@ Click **"Save Changes"** → Auto-redeploy
 
 ## 🐛 Troubleshooting
 
+### Issue: "Cannot find module './router'" or Similar Module Errors
+
+**Solution:**
+
+This is caused by Render's build cache corrupting dependencies. Update your **Build Command** to:
+
+```bash
+rm -rf node_modules package-lock.json && npm install
+```
+
+This forces a clean installation on every deploy.
+
 ### Issue: "Failed to send OTP"
 
 **Check:**
@@ -386,6 +401,7 @@ Before going live:
 - [ ] `NODE_ENV=production` on backend
 - [ ] MongoDB IP whitelist configured (or allow all for cloud deployment)
 - [ ] `.env` files not committed to Git
+- [ ] `node_modules/` not committed to Git
 - [ ] Rate limiting enabled
 - [ ] CORS properly configured
 
