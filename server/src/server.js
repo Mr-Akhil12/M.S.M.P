@@ -82,6 +82,10 @@ io.use((socket, next) => {
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('[Socket.IO] User connected:', socket.userId);
+  
+  // Join user-specific room
+  socket.join(socket.userId);
+  console.log(`[Socket.IO] User ${socket.userId} joined room`);
 
   socket.on('disconnect', () => {
     console.log('[Socket.IO] User disconnected:', socket.userId);

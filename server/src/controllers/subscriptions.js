@@ -34,29 +34,24 @@ const subscribe = async (req, res) => {
     }
     
     // Charge via telco provider
-    const providerName = getProviderFromMSISDN(userMsisdn);
-    const telcoProvider = createTelcoProvider(providerName);
-    const chargeResult = await telcoProvider.charge(userMsisdn, service.price, serviceId);
+    const telcoProvider = getProviderFromMSISDN(userMsisdn) || process.env.TELCO_PROVIDER || 'Vodacom';
+    const telco = createTelcoProvider(telcoProvider);
+    
+    const chargeResult = await telco.charge({
+      msisdn: userMsisdn,
+      amount: service.price,
+      serviceId: service._id.toString()
+    });
     
     if (!chargeResult.success) {
-      return res.status(400).json({ message: `Billing failed: ${chargeResult.error}` });
+      return res.status(400).json({ message: 'Charging failed' });
     }
     
-    // Calculate expiry based on billing cycle
+    // Create subscription and transaction
     const expiresAt = new Date();
-    switch (service.billingCycle) {
-      case 'daily':
-        expiresAt.setDate(expiresAt.getDate() + 1);
-        break;
-      case 'weekly':
-        expiresAt.setDate(expiresAt.getDate() + 7);
-        break;
-      case 'yearly':
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-        break;
-      default: // monthly
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
-    }
+    if (service.billingCycle === 'monthly') expiresAt.setMonth(expiresAt.getMonth() + 1);
+    else if (service.billingCycle === 'weekly') expiresAt.setDate(expiresAt.getDate() + 7);
+    else if (service.billingCycle === 'daily') expiresAt.setDate(expiresAt.getDate() + 1);
     
     const subscription = new Subscription({ userId, serviceId, expiresAt });
     const transaction = new Transaction({
@@ -70,9 +65,24 @@ const subscribe = async (req, res) => {
     await subscription.save();
     await transaction.save();
     
-    // Emit real-time update
+    // Populate transaction with service details for socket emission
+    await transaction.populate('serviceId');
+    
+    // Emit real-time updates
     if (io) {
-      io.emit('subscription:created', { userId, subscription, transaction });
+      io.to(userId).emit('subscription:created', { 
+        userId, 
+        subscription,
+        transaction 
+      });
+      
+      // Emit separate transaction event
+      io.to(userId).emit('transaction:created', { 
+        userId,
+        transaction
+      });
+      
+      console.log(`[Socket.IO] Emitted subscription:created and transaction:created for user ${userId}`);
     }
     
     res.status(201).json({ 
@@ -115,9 +125,24 @@ const unsubscribe = async (req, res) => {
     });
     await transaction.save();
     
-    // Emit real-time update
+    // Populate transaction with service details
+    await transaction.populate('serviceId');
+    
+    // Emit real-time updates
     if (io) {
-      io.emit('subscription:cancelled', { userId, subscription, transaction });
+      io.to(userId).emit('subscription:cancelled', { 
+        userId, 
+        subscription,
+        transaction 
+      });
+      
+      // Emit separate transaction event
+      io.to(userId).emit('transaction:created', { 
+        userId,
+        transaction
+      });
+      
+      console.log(`[Socket.IO] Emitted subscription:cancelled and transaction:created for user ${userId}`);
     }
     
     res.json({ message: 'Unsubscribed successfully', transaction });

@@ -88,9 +88,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import api from '../services/api'
+import { useSocket } from '../composables/useSocket'
 
+const { socket, isConnected } = useSocket()
 const transactions = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -101,8 +103,10 @@ const fetchTransactions = async () => {
   try {
     const response = await api.get('/transactions')
     transactions.value = response.data.transactions || []
+    console.log('✅ Transactions loaded:', transactions.value.length)
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load transactions'
+    console.error('❌ Transaction fetch error:', err)
   } finally {
     loading.value = false
   }
@@ -130,10 +134,66 @@ const getStatusClass = (status) => {
     : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
 }
 
+// Socket.IO event listeners
+const setupSocketListeners = () => {
+  if (!socket.value) {
+    console.log('⚠️ Socket not available for transaction listeners')
+    return
+  }
+
+  console.log('🔌 Setting up transaction socket listeners')
+
+  // Listen for new transactions
+  socket.value.on('transaction:created', (data) => {
+    console.log('💰 Transaction created event received:', data)
+    fetchTransactions()
+  })
+
+  // Also listen to subscription events as backup
+  socket.value.on('subscription:created', (data) => {
+    console.log('🔄 Subscription created - refreshing transactions')
+    fetchTransactions()
+  })
+
+  socket.value.on('subscription:cancelled', (data) => {
+    console.log('🔄 Subscription cancelled - refreshing transactions')
+    fetchTransactions()
+  })
+}
+
+const cleanupSocketListeners = () => {
+  if (!socket.value) return
+
+  console.log('🧹 Cleaning up transaction socket listeners')
+  socket.value.off('transaction:created')
+  socket.value.off('subscription:created')
+  socket.value.off('subscription:cancelled')
+}
+
+// Watch for socket connection changes
+watch(socket, (newSocket) => {
+  if (newSocket) {
+    console.log('✅ Socket connected in TransactionList')
+    setupSocketListeners()
+  }
+}, { immediate: true })
+
 onMounted(() => {
+  console.log('📊 TransactionList mounted')
   fetchTransactions()
+  
+  // Setup listeners if socket already exists
+  if (socket.value) {
+    setupSocketListeners()
+  }
 })
 
+onUnmounted(() => {
+  console.log('👋 TransactionList unmounting')
+  cleanupSocketListeners()
+})
+
+// Expose fetchTransactions so parent can call it
 defineExpose({
   fetchTransactions
 })
