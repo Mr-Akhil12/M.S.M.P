@@ -11,32 +11,22 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 const server = createServer(app);
 
-// CORS configuration - Allow both production and development origins
+// CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
-  process.env.CLIENT_URL // Your Vercel URL from environment variable
-].filter(Boolean); // Remove undefined values
+  process.env.CLIENT_URL,
+  'https://m-s-m-p.vercel.app'
+].filter(Boolean);
 
-// CORS middleware
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('[CORS] Blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Socket.IO configuration with updated CORS
+// Socket.IO configuration
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -85,7 +75,7 @@ io.on('connection', (socket) => {
   
   // Join user-specific room
   socket.join(socket.userId);
-  console.log(`[Socket.IO] User ${socket.userId} joined room`);
+  console.log(`[Socket.IO] User ${socket.userId} joined room ${socket.userId}`);
 
   socket.on('disconnect', () => {
     console.log('[Socket.IO] User disconnected:', socket.userId);
@@ -94,6 +84,10 @@ io.on('connection', (socket) => {
 
 // Make io accessible to routes
 app.set('io', io);
+
+// Initialize subscription controller with Socket.IO
+const subscriptionController = require('./controllers/subscriptions');
+subscriptionController.initializeSocket(io);
 
 // API Routes (with /api prefix)
 app.use('/api/auth', require('./routes/auth'));
