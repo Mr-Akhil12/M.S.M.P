@@ -287,7 +287,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 
@@ -312,7 +312,9 @@ const verifyPassword = async () => {
   error.value = ''
   try {
     const response = await api.post('/admin/verify-password', { password: password.value })
-    if (response.data.success) {
+    
+    // Fix: Check for 'valid' property instead of 'success'
+    if (response.data.valid === true) {
       isAdminVerified.value = true
       fetchStats()
     } else {
@@ -357,8 +359,4 @@ const setActiveTab = (tab) => {
     fetchUserStats()
   }
 }
-
-onMounted(() => {
-  // Stats fetched after password verification
-})
 </script>
