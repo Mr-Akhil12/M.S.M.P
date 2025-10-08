@@ -7,6 +7,10 @@ const otpLimiter = rateLimit({
   message: 'Too many OTP requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  // Trust proxy in production, skip in development
+  skipFailedRequests: false,
+  skipSuccessfulRequests: false,
+  trustProxy: process.env.NODE_ENV === 'production'
 });
 
 // General API: 100 requests per 15 minutes
@@ -16,6 +20,7 @@ const generalLimiter = rateLimit({
   message: 'Too many requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  trustProxy: process.env.NODE_ENV === 'production'
 });
 
 module.exports = { otpLimiter, generalLimiter };
