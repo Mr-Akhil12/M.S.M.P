@@ -1,6 +1,6 @@
 <template>
   <!-- Container centered by App.vue main -->
-  <section class="w-full items-center justify-center px-0 py-16 sm:px-6 lg:px-8 min-h-screen min-w-screen flex">
+  <section class="w-full items-center justify-center px-4 py-16 sm:px-6 lg:px-8 min-h-screen min-w-screen flex">
     <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-4xl">
       <!-- Header -->
       <div class="text-center mb-6 sm:mb-8">
