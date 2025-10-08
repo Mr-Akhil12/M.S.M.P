@@ -1,27 +1,104 @@
 # 📡 API Documentation - MSMP
 
-Complete API reference for the Mobile Subscription Management Portal backend.
+> **Complete REST API reference for the Mobile Subscription Management Portal.**  
+> Built with Express.js, JWT authentication, Socket.IO real-time events, and production-grade security.
+
+<div align="center">
+
+[![API Status](https://img.shields.io/badge/Status-Live-brightgreen?style=for-the-badge)](https://m-s-m-p.onrender.com/health)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)](https://github.com/Mr-Akhil12/M.S.M.P)
+[![Docs](https://img.shields.io/badge/Docs-Complete-orange?style=for-the-badge)](API.md)
+
+</div>
 
 ---
 
 ## 🌐 Base URLs
 
-- **Local Development:** `http://localhost:5000/api`
-- **Production:** `https://m-s-m-p.onrender.com/api`
+| Environment | Base URL | Status |
+|-------------|----------|--------|
+| **Production** | `https://m-s-m-p.onrender.com/api` | ✅ Live |
+| **Local Dev** | `http://localhost:5000/api` | 🔧 Dev |
 
-**Note:** The health check endpoint (`/health`) does NOT use the `/api` prefix.
+> **⚠️ Note:** Health check endpoint (`/health`) does **NOT** use the `/api` prefix.
+
+---
+
+## 🚀 Quick Start
+
+### Test the API (No Auth Required)
+
+```bash
+# Health check
+curl https://m-s-m-p.onrender.com/health
+
+# Expected response:
+# {
+#   "status": "OK",
+#   "timestamp": "2025-10-08T17:30:00.000Z",
+#   "environment": "production"
+# }
+```
+
+### Authentication Flow
+
+```bash
+# 1. Request OTP
+curl -X POST https://m-s-m-p.onrender.com/api/auth/send-otp \
+  -H "Content-Type: application/json" \
+  -d '{"msisdn":"27812345678"}'
+
+# 2. Verify OTP (get token)
+curl -X POST https://m-s-m-p.onrender.com/api/auth/verify-otp \
+  -H "Content-Type: application/json" \
+  -d '{"msisdn":"27812345678","otp":"123456"}'
+
+# 3. Use token for authenticated requests
+curl https://m-s-m-p.onrender.com/api/services \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
+```
 
 ---
 
 ## 🔐 Authentication
 
-Most endpoints require JWT authentication.
+Most endpoints require JWT authentication via the `Authorization` header.
 
-### Request Header
+### Request Header Format
 
 ```http
-Authorization: Bearer <your-jwt-token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
+
+### Token Lifecycle
+
+- **Issued:** On successful OTP verification
+- **Expiry:** 24 hours after issuance
+- **Renewal:** Re-authenticate with OTP
+- **Scope:** User-specific (includes `userId` in payload)
+
+### Token Payload
+
+```json
+{
+  "id": "68e4eacd99b1bc084f4e4897",
+  "msisdn": "27812345678",
+  "iat": 1728408000,
+  "exp": 1728494400
+}
+```
+
+---
+
+## 📚 Endpoints Overview
+
+| Category | Endpoints | Auth Required |
+|----------|-----------|---------------|
+| **🔑 Authentication** | 2 endpoints | ❌ Public |
+| **📦 Services** | 2 endpoints | ✅ Required |
+| **📝 Subscriptions** | 3 endpoints | ✅ Required |
+| **💰 Transactions** | 1 endpoint | ✅ Required |
+| **👨‍💼 Admin** | 3 endpoints | ⚠️ Admin only |
 
 ---
 
@@ -29,45 +106,52 @@ Authorization: Bearer <your-jwt-token>
 
 ### 1. Send OTP
 
-Request an OTP to be sent via SMS.
+Request an OTP to be sent via SMS (or logged in test mode).
 
 **Endpoint:** `POST /api/auth/send-otp`
 
 **Request Body:**
-
 ```json
 {
   "msisdn": "27812345678"
 }
 ```
 
-**Response (200):**
+**Validation Rules:**
+- ✅ Must be South African number (starts with `27`)
+- ✅ Exactly 11 digits (27 + 9 digits)
+- ✅ No spaces, dashes, or special characters
 
+**Success Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "OTP sent successfully",
-  "data": {
-    "msisdn": "27812345678",
-    "expiresIn": 300
-  }
+  "message": "OTP sent successfully"
 }
 ```
 
+> **💡 Test Mode:** OTP is logged to Render console, not sent via SMS (see [backend logs](https://dashboard.render.com/)).
+
 **Error Responses:**
 
-- `400`: Invalid MSISDN format
-- `429`: Rate limit exceeded
-- `500`: SMS service error
+| Code | Message | Cause |
+|------|---------|-------|
+| `400` | `Invalid MSISDN format` | Number doesn't match SA format |
+| `429` | `Too many OTP requests, please try again later` | Rate limit: 3 requests per 15 min |
+| `500` | `Failed to send OTP` | SMS service error (production mode) |
+
+**Rate Limit:**
+- **3 requests per 15 minutes** per IP address
+- Resets automatically after window expires
+
+---
 
 ### 2. Verify OTP
 
-Verify OTP and receive JWT token.
+Verify OTP code and receive JWT token for authentication.
 
 **Endpoint:** `POST /api/auth/verify-otp`
 
 **Request Body:**
-
 ```json
 {
   "msisdn": "27812345678",
@@ -75,29 +159,38 @@ Verify OTP and receive JWT token.
 }
 ```
 
-**Response (200):**
+**Validation Rules:**
+- ✅ OTP must be 6 digits
+- ✅ OTP must be valid (not expired)
+- ✅ Maximum 3 verification attempts
+- ✅ OTP expires after 5 minutes
 
+**Success Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIs...",
-    "user": {
-      "id": "user_id",
-      "msisdn": "27812345678",
-      "telco": "Vodacom",
-      "createdAt": "2025-01-07T10:00:00.000Z"
-    }
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "68e4eacd99b1bc084f4e4897",
+    "msisdn": "27812345678",
+    "createdAt": "2025-10-08T15:30:00.000Z"
   }
 }
 ```
 
 **Error Responses:**
 
-- `400`: Invalid OTP or expired
-- `404`: User not found
-- `429`: Too many attempts
+| Code | Message | Cause |
+|------|---------|-------|
+| `400` | `Invalid or expired OTP` | OTP incorrect or expired |
+| `400` | `Maximum verification attempts exceeded` | 3+ failed attempts |
+| `404` | `OTP not found. Please request a new one.` | No OTP requested for this number |
+| `500` | `OTP verification failed` | Server error |
+
+**OTP Lifecycle:**
+1. **Generated:** When `/send-otp` is called
+2. **Stored:** In-memory Map with 5-minute TTL
+3. **Validated:** On `/verify-otp` request
+4. **Deleted:** After successful verification or expiry
 
 ---
 
@@ -105,535 +198,1060 @@ Verify OTP and receive JWT token.
 
 ### 3. Get All Services
 
-Retrieve all available services.
+Retrieve list of all available subscription services.
 
 **Endpoint:** `GET /api/services`
 
-**Response (200):**
+**Authentication:** ✅ Required (JWT)
 
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "service_id",
-      "name": "Netflix Premium",
-      "description": "Premium streaming service",
-      "price": 299,
-      "currency": "ZAR",
-      "category": "Entertainment",
-      "active": true,
-      "createdAt": "2025-01-07T10:00:00.000Z"
-    }
-  ]
-}
+**Request Headers:**
+```http
+Authorization: Bearer YOUR_JWT_TOKEN
 ```
 
-### Get Service by ID
+**Success Response (200 OK):**
+```json
+[
+  {
+    "_id": "68e06b840157e61e65942b14",
+    "name": "Showmax Premium",
+    "description": "Unlimited SA movies, series and live sport",
+    "category": "entertainment",
+    "price": 79.99,
+    "billingCycle": "monthly",
+    "imageUrl": "https://example.com/showmax.png",
+    "isActive": true,
+    "features": [
+      "4K Ultra HD",
+      "5 simultaneous streams",
+      "Download for offline viewing"
+    ],
+    "createdAt": "2025-01-07T10:00:00.000Z",
+    "updatedAt": "2025-01-07T10:00:00.000Z"
+  },
+  {
+    "_id": "68e06b840157e61e65942b15",
+    "name": "Netflix Standard",
+    "description": "Stream unlimited movies and TV shows",
+    "category": "entertainment",
+    "price": 159.00,
+    "billingCycle": "monthly",
+    "imageUrl": "https://example.com/netflix.png",
+    "isActive": true,
+    "features": [
+      "HD streaming",
+      "2 simultaneous streams",
+      "Cancel anytime"
+    ],
+    "createdAt": "2025-01-07T10:00:00.000Z",
+    "updatedAt": "2025-01-07T10:00:00.000Z"
+  }
+]
+```
 
-**GET** `/services/:id`
+**Response Fields:**
 
-Retrieve specific service details.
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | String | MongoDB ObjectId (unique) |
+| `name` | String | Service display name |
+| `description` | String | Short description (max 200 chars) |
+| `category` | String | `entertainment`, `productivity`, `lifestyle` |
+| `price` | Number | Monthly price in ZAR (decimal) |
+| `billingCycle` | String | `monthly`, `weekly`, `daily` |
+| `imageUrl` | String | Service logo/image URL |
+| `isActive` | Boolean | Whether service is available for subscription |
+| `features` | Array | List of service features |
 
-**Response (200):**
+**Error Responses:**
 
+| Code | Message | Cause |
+|------|---------|-------|
+| `401` | `Unauthorized` | Missing or invalid JWT token |
+| `500` | `Failed to fetch services` | Database error |
+
+---
+
+### 4. Get Service by ID
+
+Retrieve detailed information about a specific service.
+
+**Endpoint:** `GET /api/services/:serviceId`
+
+**Authentication:** ✅ Required (JWT)
+
+**URL Parameters:**
+- `serviceId` - MongoDB ObjectId of the service
+
+**Example Request:**
+```bash
+curl https://m-s-m-p.onrender.com/api/services/68e06b840157e61e65942b14 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Success Response (200 OK):**
 ```json
 {
-  "success": true,
-  "data": {
-    "id": "service_id",
-    "name": "Netflix Premium",
-    "description": "Premium streaming service",
-    "price": 299,
-    "currency": "ZAR",
-    "category": "Entertainment",
-    "active": true,
-    "createdAt": "2025-01-07T10:00:00.000Z"
-  }
+  "_id": "68e06b840157e61e65942b14",
+  "name": "Showmax Premium",
+  "description": "Unlimited SA movies, series and live sport",
+  "category": "entertainment",
+  "price": 79.99,
+  "billingCycle": "monthly",
+  "imageUrl": "https://example.com/showmax.png",
+  "isActive": true,
+  "features": [
+    "4K Ultra HD",
+    "5 simultaneous streams",
+    "Download for offline viewing"
+  ],
+  "createdAt": "2025-01-07T10:00:00.000Z",
+  "updatedAt": "2025-01-07T10:00:00.000Z"
 }
 ```
 
 **Error Responses:**
 
-- `404`: Service not found
+| Code | Message | Cause |
+|------|---------|-------|
+| `404` | `Service not found` | Invalid serviceId |
+| `401` | `Unauthorized` | Missing or invalid token |
 
 ---
 
 ## 📝 Subscription Endpoints
 
-### 4. Get User Subscriptions
+### 5. Get User Subscriptions
 
-Retrieve all active subscriptions for authenticated user.
+Retrieve all active subscriptions for the authenticated user.
 
 **Endpoint:** `GET /api/subscriptions`
 
-**Response (200):**
+**Authentication:** ✅ Required (JWT)
 
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "sub_id",
-      "service": {
-        "id": "service_id",
-        "name": "Netflix Premium",
-        "price": 299,
-        "currency": "ZAR"
-      },
-      "status": "active",
-      "startDate": "2025-01-07T10:00:00.000Z",
-      "endDate": "2025-02-07T10:00:00.000Z",
-      "autoRenew": true,
-      "createdAt": "2025-01-07T10:00:00.000Z"
-    }
-  ]
-}
+**Example Request:**
+```bash
+curl https://m-s-m-p.onrender.com/api/subscriptions \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-### 5. Subscribe to Service
+**Success Response (200 OK):**
+```json
+[
+  {
+    "_id": "68e4eacd99b1bc084f4e4898",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": {
+      "_id": "68e06b840157e61e65942b14",
+      "name": "Showmax Premium",
+      "price": 79.99,
+      "imageUrl": "https://example.com/showmax.png"
+    },
+    "status": "active",
+    "subscribedAt": "2025-10-08T15:30:00.000Z",
+    "expiresAt": "2025-11-08T15:30:00.000Z",
+    "createdAt": "2025-10-08T15:30:00.000Z",
+    "updatedAt": "2025-10-08T15:30:00.000Z"
+  }
+]
+```
 
-Create a new subscription.
+**Subscription Statuses:**
+- `active` - Currently active subscription
+- `cancelled` - User cancelled (soft delete)
+- `expired` - Billing cycle ended without renewal
+
+**Error Responses:**
+
+| Code | Message | Cause |
+|------|---------|-------|
+| `401` | `Unauthorized` | Missing or invalid token |
+| `500` | `Failed to fetch subscriptions` | Database error |
+
+---
+
+### 6. Subscribe to Service
+
+Create a new subscription to a service (charges user via telco provider).
 
 **Endpoint:** `POST /api/subscriptions`
 
+**Authentication:** ✅ Required (JWT)
+
 **Request Body:**
-
 ```json
 {
-  "serviceId": "service_id",
-  "autoRenew": true
+  "serviceId": "68e06b840157e61e65942b14"
 }
 ```
 
-**Response (201):**
+**Example Request:**
+```bash
+curl -X POST https://m-s-m-p.onrender.com/api/subscriptions \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"serviceId":"68e06b840157e61e65942b14"}'
+```
 
+**Success Response (201 Created):**
 ```json
 {
-  "success": true,
   "message": "Subscription created successfully",
-  "data": {
-    "id": "sub_id",
-    "service": {
-      "id": "service_id",
-      "name": "Netflix Premium",
-      "price": 299,
-      "currency": "ZAR"
-    },
+  "subscription": {
+    "_id": "68e4eacd99b1bc084f4e4898",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": "68e06b840157e61e65942b14",
     "status": "active",
-    "startDate": "2025-01-07T10:00:00.000Z",
-    "endDate": "2025-02-07T10:00:00.000Z",
-    "autoRenew": true,
-    "createdAt": "2025-01-07T10:00:00.000Z"
-  }
+    "subscribedAt": "2025-10-08T15:30:00.000Z",
+    "expiresAt": "2025-11-08T15:30:00.000Z"
+  },
+  "transaction": {
+    "_id": "68e4eacd99b1bc084f4e4899",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": "68e06b840157e61e65942b14",
+    "type": "subscription",
+    "amount": 79.99,
+    "status": "success",
+    "description": "Showmax Premium subscription",
+    "createdAt": "2025-10-08T15:30:00.000Z"
+  },
+  "telcoTransactionId": "vodacom_1728408000000_abc123xyz"
 }
 ```
+
+**What Happens on Subscription:**
+1. ✅ Validates service exists and is active
+2. ✅ Checks for duplicate active subscription
+3. ✅ Charges user via telco provider (Vodacom/MTN/CellC)
+4. ✅ Creates subscription record (MongoDB)
+5. ✅ Creates transaction record (audit trail)
+6. ✅ Broadcasts real-time event via Socket.IO
+7. ✅ Returns subscription + transaction details
 
 **Error Responses:**
 
-- `400`: Already subscribed or insufficient balance
-- `404`: Service not found
+| Code | Message | Cause |
+|------|---------|-------|
+| `400` | `Already subscribed to this service` | Duplicate subscription attempt |
+| `404` | `Service not found` | Invalid serviceId |
+| `500` | `Subscription failed` | Telco provider error |
+| `401` | `Unauthorized` | Missing or invalid token |
 
-### 6. Cancel Subscription
+---
 
-Cancel an active subscription.
+### 7. Cancel Subscription
+
+Cancel an active subscription (creates refund transaction).
 
 **Endpoint:** `DELETE /api/subscriptions/:serviceId`
 
-**Response (200):**
+**Authentication:** ✅ Required (JWT)
 
-```json
-{
-  "success": true,
-  "message": "Subscription cancelled successfully"
-}
+**URL Parameters:**
+- `serviceId` - MongoDB ObjectId of the service to unsubscribe from
+
+**Example Request:**
+```bash
+curl -X DELETE https://m-s-m-p.onrender.com/api/subscriptions/68e06b840157e61e65942b14 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-**Error Responses:**
-
-- `404`: Subscription not found
-- `403`: Not authorized to cancel this subscription
-
-### Update Subscription
-
-**PUT** `/subscriptions/:id`
-
-Update subscription settings.
-
-**Request Body:**
-
+**Success Response (200 OK):**
 ```json
 {
-  "autoRenew": false
-}
-```
-
-**Response (200):**
-
-```json
-{
-  "success": true,
-  "message": "Subscription updated successfully",
-  "data": {
-    "id": "sub_id",
-    "autoRenew": false
+  "message": "Unsubscribed successfully",
+  "transaction": {
+    "_id": "68e4eacd99b1bc084f4e489a",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": "68e06b840157e61e65942b14",
+    "type": "unsubscription",
+    "amount": 79.99,
+    "status": "success",
+    "description": "Showmax Premium unsubscription",
+    "createdAt": "2025-10-08T16:45:00.000Z"
   }
 }
 ```
+
+**What Happens on Cancellation:**
+1. ✅ Finds active subscription for user + service
+2. ✅ Updates subscription status to `cancelled` (soft delete)
+3. ✅ Creates refund transaction (telco provider)
+4. ✅ Broadcasts real-time cancellation event
+5. ✅ Returns transaction details
+
+**Error Responses:**
+
+| Code | Message | Cause |
+|------|---------|-------|
+| `404` | `Subscription not found` | No active subscription for this service |
+| `403` | `Not authorized` | Attempting to cancel another user's subscription |
+| `500` | `Failed to cancel subscription` | Database or telco error |
 
 ---
 
 ## 💰 Transaction Endpoints
 
-### 7. Get User Transactions
+### 8. Get User Transactions
 
-Retrieve transaction history for authenticated user.
+Retrieve transaction history for the authenticated user.
 
 **Endpoint:** `GET /api/transactions`
 
-**Query Parameters:**
+**Authentication:** ✅ Required (JWT)
 
-- `limit` (optional): Number of transactions (default: 20, max: 100)
-- `offset` (optional): Skip transactions (default: 0)
-
-**Response (200):**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "txn_id",
-      "type": "subscription",
-      "amount": 299,
-      "currency": "ZAR",
-      "status": "completed",
-      "description": "Netflix Premium subscription",
-      "service": {
-        "id": "service_id",
-        "name": "Netflix Premium"
-      },
-      "createdAt": "2025-01-07T10:00:00.000Z"
-    }
-  ],
-  "pagination": {
-    "total": 45,
-    "limit": 20,
-    "offset": 0,
-    "hasMore": true
-  }
-}
+**Example Request:**
+```bash
+curl https://m-s-m-p.onrender.com/api/transactions \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-### Get Transaction by ID
-
-**GET** `/transactions/:id`
-
-Get specific transaction details.
-
-**Response (200):**
-
+**Success Response (200 OK):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "txn_id",
-    "type": "subscription",
-    "amount": 299,
-    "currency": "ZAR",
-    "status": "completed",
-    "description": "Netflix Premium subscription",
-    "service": {
-      "id": "service_id",
-      "name": "Netflix Premium"
+[
+  {
+    "_id": "68e4eacd99b1bc084f4e4899",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": {
+      "_id": "68e06b840157e61e65942b14",
+      "name": "Showmax Premium",
+      "imageUrl": "https://example.com/showmax.png"
     },
-    "createdAt": "2025-01-07T10:00:00.000Z"
+    "type": "subscription",
+    "amount": 79.99,
+    "status": "success",
+    "description": "Showmax Premium subscription",
+    "telcoTransactionId": "vodacom_1728408000000_abc123xyz",
+    "createdAt": "2025-10-08T15:30:00.000Z"
+  },
+  {
+    "_id": "68e4eacd99b1bc084f4e489a",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": {
+      "_id": "68e06b840157e61e65942b14",
+      "name": "Showmax Premium",
+      "imageUrl": "https://example.com/showmax.png"
+    },
+    "type": "unsubscription",
+    "amount": 79.99,
+    "status": "success",
+    "description": "Showmax Premium unsubscription",
+    "telcoTransactionId": "vodacom_1728411900000_xyz789abc",
+    "createdAt": "2025-10-08T16:45:00.000Z"
   }
-}
+]
 ```
+
+**Transaction Types:**
+- `subscription` - New subscription created (charge)
+- `unsubscription` - Subscription cancelled (refund)
+
+**Transaction Statuses:**
+- `success` - Payment/refund successful
+- `pending` - Transaction processing
+- `failed` - Payment/refund failed
+
+**Sorting:**
+- Transactions returned in reverse chronological order (newest first)
+
+**Error Responses:**
+
+| Code | Message | Cause |
+|------|---------|-------|
+| `401` | `Unauthorized` | Missing or invalid token |
+| `500` | `Failed to fetch transactions` | Database error |
 
 ---
 
 ## 👨‍💼 Admin Endpoints
 
-### 8. Verify Admin Password
+### 9. Verify Admin Password
 
-Verify admin password to access admin dashboard.
+Authenticate as admin to access admin dashboard.
 
 **Endpoint:** `POST /api/admin/verify-password`
 
+**Authentication:** ❌ Not required (password-based)
+
 **Request Body:**
-
 ```json
 {
-  "password": "YourSecurePassword123!"
+  "password": "Password123!"
 }
 ```
 
-**Response (200):**
+**Example Request:**
+```bash
+curl -X POST https://m-s-m-p.onrender.com/api/admin/verify-password \
+  -H "Content-Type: application/json" \
+  -d '{"password":"Password123!"}'
+```
 
+**Success Response (200 OK):**
 ```json
 {
-  "success": true,
-  "message": "Admin login successful",
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIs...",
-    "admin": {
-      "id": "admin_id",
-      "role": "admin",
-      "createdAt": "2025-01-07T10:00:00.000Z"
-    }
-  }
+  "valid": true,
+  "success": true
 }
 ```
 
-### 9. Get Admin Statistics
+**Error Responses:**
 
-Retrieve platform-wide statistics.
+| Code | Message | Cause |
+|------|---------|-------|
+| `400` | `Password is required` | Missing password field |
+| `401` | `Invalid password` | Incorrect password |
+| `500` | `Verification failed` | Server error |
+
+**Security Notes:**
+- ⚠️ Production: Change `ADMIN_PASSWORD` from default `Password123!`
+- 🔒 Use strong password (min 12 chars, mixed case, numbers, symbols)
+- 🚫 No rate limiting on this endpoint (consider adding for production)
+
+---
+
+### 10. Get Platform Statistics
+
+Retrieve platform-wide analytics and revenue data.
 
 **Endpoint:** `GET /api/admin/stats`
 
-**Response (200):**
+**Authentication:** ⚠️ Admin verification recommended (not enforced)
 
+**Example Request:**
+```bash
+curl https://m-s-m-p.onrender.com/api/admin/stats
+```
+
+**Success Response (200 OK):**
 ```json
 {
-  "success": true,
-  "data": {
-    "totalUsers": 1250,
-    "totalSubscriptions": 890,
-    "totalRevenue": 267100,
-    "activeSubscriptions": 756,
-    "recentTransactions": 45,
-    "topServices": [
-      {
-        "name": "Netflix Premium",
-        "subscriptions": 234
-      }
-    ]
-  }
+  "totalUsers": 42,
+  "totalActiveSubscriptions": 87,
+  "totalRevenue": 6959.13,
+  "serviceBreakdown": [
+    {
+      "_id": "68e06b840157e61e65942b14",
+      "name": "Showmax Premium",
+      "activeSubscriptions": 25,
+      "revenue": 1999.75
+    },
+    {
+      "_id": "68e06b840157e61e65942b15",
+      "name": "Netflix Standard",
+      "activeSubscriptions": 18,
+      "revenue": 2862.00
+    },
+    {
+      "_id": "68e06b840157e61e65942b16",
+      "name": "Spotify Premium",
+      "activeSubscriptions": 44,
+      "revenue": 2097.38
+    }
+  ]
 }
 ```
 
-### 10. Get User Statistics
+**Response Fields:**
 
-Retrieve user-level impact statistics.
+| Field | Type | Description |
+|-------|------|-------------|
+| `totalUsers` | Number | Total registered users |
+| `totalActiveSubscriptions` | Number | Total active subscriptions (all users) |
+| `totalRevenue` | Number | Total monthly recurring revenue (MRR) in ZAR |
+| `serviceBreakdown` | Array | Per-service stats |
+| `serviceBreakdown[].name` | String | Service name |
+| `serviceBreakdown[].activeSubscriptions` | Number | Active subscriptions for this service |
+| `serviceBreakdown[].revenue` | Number | MRR for this service (rounded to 2 decimals) |
+
+**Revenue Calculation:**
+```javascript
+// Per service
+revenue = activeSubscriptions * servicePrice
+
+// Total
+totalRevenue = sum(all service revenues)
+```
+
+**Error Responses:**
+
+| Code | Message | Cause |
+|------|---------|-------|
+| `500` | `Failed to fetch stats` | Database aggregation error |
+
+---
+
+### 11. Get User Statistics
+
+Retrieve detailed user-level statistics (subscriptions per user, revenue contribution).
 
 **Endpoint:** `GET /api/admin/user-stats`
 
-**Response (200):**
+**Authentication:** ⚠️ Admin verification recommended (not enforced)
 
+**Example Request:**
+```bash
+curl https://m-s-m-p.onrender.com/api/admin/user-stats
+```
+
+**Success Response (200 OK):**
+```json
+[
+  {
+    "_id": "68e4eacd99b1bc084f4e4897",
+    "msisdn": "27812345678",
+    "subscriptions": ["Showmax Premium", "Netflix Standard"],
+    "totalRevenue": 239.99
+  },
+  {
+    "_id": "68e4eacd99b1bc084f4e4898",
+    "msisdn": "27898765432",
+    "subscriptions": ["Spotify Premium"],
+    "totalRevenue": 47.67
+  }
+]
+```
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | String | User MongoDB ObjectId |
+| `msisdn` | String | User phone number |
+| `subscriptions` | Array | List of active service names |
+| `totalRevenue` | Number | User's monthly contribution (rounded to 2 decimals) |
+
+**Use Cases:**
+- Identify high-value customers
+- Analyze subscription patterns
+- Segment users by revenue
+- Target marketing campaigns
+
+**Error Responses:**
+
+| Code | Message | Cause |
+|------|---------|-------|
+| `500` | `Failed to fetch user stats` | Database aggregation error |
+
+---
+
+## 🔌 Real-time Updates (Socket.IO)
+
+The API supports real-time updates via WebSocket connections using Socket.IO.
+
+### Connection Setup
+
+**Client-side (JavaScript):**
+```javascript
+import { io } from 'socket.io-client'
+
+const socket = io('https://m-s-m-p.onrender.com', {
+  auth: {
+    token: 'YOUR_JWT_TOKEN_HERE'
+  },
+  transports: ['websocket', 'polling'], // WebSocket preferred, fallback to polling
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionAttempts: 5
+})
+
+// Connection events
+socket.on('connect', () => {
+  console.log('✅ Socket connected:', socket.id)
+})
+
+socket.on('disconnect', (reason) => {
+  console.log('❌ Socket disconnected:', reason)
+})
+
+socket.on('connect_error', (error) => {
+  console.error('🔴 Connection error:', error.message)
+})
+```
+
+### Authentication
+
+**Socket.IO requires JWT authentication:**
+
+```javascript
+// ✅ Correct - token in auth handshake
+const socket = io('https://m-s-m-p.onrender.com', {
+  auth: {
+    token: jwtToken
+  }
+})
+
+// ❌ Wrong - will be rejected
+const socket = io('https://m-s-m-p.onrender.com')
+// Error: "Authentication error"
+```
+
+**Server validates token on connection:**
+1. Extracts token from handshake
+2. Verifies JWT signature
+3. Decodes userId from payload
+4. Joins user-specific room: `socket.join(userId)`
+
+---
+
+### Real-time Events
+
+#### 📦 subscription:created
+
+Emitted when a new subscription is created.
+
+**Event Name:** `subscription:created`
+
+**Payload:**
 ```json
 {
-  "success": true,
-  "data": {
-    "totalActiveSubscriptions": 756,
-    "totalRevenue": 267100,
-    "monthlyGrowth": 12.5,
-    "churnRate": 5.3
+  "subscription": {
+    "_id": "68e4eacd99b1bc084f4e4898",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": {
+      "_id": "68e06b840157e61e65942b14",
+      "name": "Showmax Premium",
+      "price": 79.99
+    },
+    "status": "active",
+    "subscribedAt": "2025-10-08T15:30:00.000Z"
   }
 }
+```
+
+**Example Listener:**
+```javascript
+socket.on('subscription:created', (data) => {
+  console.log('🎉 New subscription:', data.subscription)
+  // Update UI: add to active subscriptions list
+})
 ```
 
 ---
 
-## 🔌 WebSocket Events
+#### 🚫 subscription:cancelled
 
-The API supports real-time updates via Socket.IO.
+Emitted when a subscription is cancelled.
 
-### Connection
+**Event Name:** `subscription:cancelled`
 
+**Payload:**
+```json
+{
+  "subscription": {
+    "_id": "68e4eacd99b1bc084f4e4898",
+    "serviceId": "68e06b840157e61e65942b14",
+    "status": "cancelled",
+    "cancelledAt": "2025-10-08T16:45:00.000Z"
+  }
+}
+```
+
+**Example Listener:**
 ```javascript
-import io from "socket.io-client";
-
-const socket = io("https://your-backend.onrender.com", {
-  auth: {
-    token: "your_jwt_token",
-  },
-});
+socket.on('subscription:cancelled', (data) => {
+  console.log('🚫 Subscription cancelled:', data.subscription)
+  // Update UI: remove from active subscriptions
+})
 ```
 
-### Events
+---
 
-#### User Events
+#### 💰 transaction:created
 
-**subscription:created**
+Emitted when a new transaction is recorded.
 
-```json
-{
-  "subscription": {
-    "id": "sub_id",
-    "service": {
-      "name": "Netflix Premium",
-      "price": 299
-    },
-    "status": "active"
-  }
-}
-```
+**Event Name:** `transaction:created`
 
-**subscription:cancelled**
-
-```json
-{
-  "subscription": {
-    "id": "sub_id",
-    "service": {
-      "name": "Netflix Premium"
-    }
-  }
-}
-```
-
-**transaction:created**
-
+**Payload:**
 ```json
 {
   "transaction": {
-    "id": "txn_id",
+    "_id": "68e4eacd99b1bc084f4e4899",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": {
+      "_id": "68e06b840157e61e65942b14",
+      "name": "Showmax Premium"
+    },
     "type": "subscription",
-    "amount": 299,
-    "description": "Netflix Premium subscription"
+    "amount": 79.99,
+    "status": "success",
+    "description": "Showmax Premium subscription",
+    "createdAt": "2025-10-08T15:30:00.000Z"
   }
 }
 ```
 
-#### Admin Events
-
-**user:registered**
-
-```json
-{
-  "user": {
-    "id": "user_id",
-    "msisdn": "27812345678",
-    "telco": "Vodacom"
-  }
-}
-```
-
-**subscription:updated**
-
-```json
-{
-  "subscription": {
-    "id": "sub_id",
-    "status": "cancelled"
-  }
-}
+**Example Listener:**
+```javascript
+socket.on('transaction:created', (data) => {
+  console.log('💰 New transaction:', data.transaction)
+  // Update UI: add to transaction history (prepend to list)
+})
 ```
 
 ---
 
-## 📊 Response Format
+### Room Architecture
 
-All API responses follow this structure:
+**User-Specific Rooms:**
+- Each authenticated user joins a room named after their `userId`
+- Events are broadcast only to specific user rooms
+- No cross-user event leakage
 
-**Success Response:**
+**Example Server-Side Broadcast:**
+```javascript
+// Emit to specific user
+io.to(userId).emit('transaction:created', { transaction })
+
+// Only that user receives the event
+// Other connected users won't see it
+```
+
+**Why Rooms?**
+- ✅ Privacy: User A can't see User B's events
+- ✅ Efficiency: No need to filter events client-side
+- ✅ Scalability: Easy to add admin rooms, broadcast rooms, etc.
+
+---
+
+### Connection Lifecycle
+
+```
+1. Client connects with JWT token
+   ↓
+2. Server validates token
+   ↓
+3. Server extracts userId
+   ↓
+4. Server joins user to room: socket.join(userId)
+   ↓
+5. Client receives 'connect' event
+   ↓
+6. Client listens for events
+   ↓
+7. Server emits events to user's room
+   ↓
+8. Client receives & updates UI
+   ↓
+9. Connection drops (network/browser close)
+   ↓
+10. Client auto-reconnects (with same token)
+```
+
+**Reconnection Logic:**
+- Automatic: Socket.IO handles reconnection
+- Exponential backoff: 1s, 2s, 4s, 8s, 16s
+- Max attempts: 5 (configurable)
+- Token re-validation on reconnection
+
+---
+
+## 📊 Response Format Standards
+
+All API responses follow a consistent structure for easy parsing.
+
+### Success Response
 
 ```json
 {
-  "success": true,
   "message": "Operation successful",
-  "data": { ... },
-  "pagination": { ... } // Only for list endpoints
+  "data": { /* response payload */ }
 }
 ```
 
-**Error Response:**
+**Or for lists:**
+```json
+{
+  "message": "Subscriptions retrieved",
+  "data": [ /* array of items */ ]
+}
+```
+
+### Error Response
 
 ```json
 {
-  "success": false,
-  "message": "Error description",
-  "error": "ERROR_CODE",
-  "details": { ... } // Optional additional error info
+  "message": "Human-readable error description",
+  "error": "ERROR_CODE"
+}
+```
+
+**Example:**
+```json
+{
+  "message": "Service not found",
+  "error": "SERVICE_NOT_FOUND"
 }
 ```
 
 ---
 
-## ⚠️ Error Codes
+## ⚠️ Error Codes Reference
 
-| Code                     | Description                          |
-| ------------------------ | ------------------------------------ |
-| `INVALID_MSISDN`         | Invalid mobile number format         |
-| `OTP_EXPIRED`            | OTP has expired                      |
-| `OTP_INVALID`            | Incorrect OTP entered                |
-| `RATE_LIMIT_EXCEEDED`    | Too many requests                    |
-| `INSUFFICIENT_BALANCE`   | Not enough balance for subscription  |
-| `SERVICE_NOT_FOUND`      | Requested service doesn't exist      |
-| `SUBSCRIPTION_NOT_FOUND` | Requested subscription doesn't exist |
-| `UNAUTHORIZED`           | Authentication required              |
-| `FORBIDDEN`              | Insufficient permissions             |
-| `VALIDATION_ERROR`       | Invalid request data                 |
-| `INTERNAL_ERROR`         | Server error                         |
-
----
-
-## 🔒 Rate Limits
-
-| Endpoint            | Limit        | Window     |
-| ------------------- | ------------ | ---------- |
-| `/auth/send-otp`    | 5 requests   | 15 minutes |
-| `/auth/verify-otp`  | 10 requests  | 15 minutes |
-| All other endpoints | 100 requests | 15 minutes |
+| Code | HTTP Status | Description | User Action |
+|------|-------------|-------------|-------------|
+| `INVALID_MSISDN` | 400 | Invalid phone number format | Enter valid SA number (27XXXXXXXXX) |
+| `OTP_EXPIRED` | 400 | OTP has expired (5 min limit) | Request new OTP |
+| `OTP_INVALID` | 400 | Incorrect OTP code | Check SMS and try again |
+| `OTP_ATTEMPTS_EXCEEDED` | 400 | Too many wrong OTP attempts | Request new OTP |
+| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests | Wait 15 minutes and retry |
+| `SERVICE_NOT_FOUND` | 404 | Service doesn't exist | Check service ID |
+| `SUBSCRIPTION_NOT_FOUND` | 404 | No active subscription | Subscribe first |
+| `ALREADY_SUBSCRIBED` | 400 | Duplicate subscription | Unsubscribe first if you want to re-subscribe |
+| `UNAUTHORIZED` | 401 | Missing/invalid JWT token | Login again (verify OTP) |
+| `FORBIDDEN` | 403 | Insufficient permissions | Admin access required |
+| `VALIDATION_ERROR` | 400 | Invalid request data | Check request format |
+| `INTERNAL_ERROR` | 500 | Server error | Try again later or contact support |
 
 ---
 
-## 🧪 Testing
+## 🚦 Rate Limiting
 
-### Health Check
+Rate limits protect the API from abuse and ensure fair usage.
 
-**GET** `/health`
+### Limits by Endpoint
 
-Check if API is running.
+| Endpoint | Limit | Window | Status Code |
+|----------|-------|--------|-------------|
+| `POST /auth/send-otp` | **3 requests** | 15 minutes | 429 |
+| `POST /auth/verify-otp` | **10 requests** | 15 minutes | 429 |
+| All other endpoints | **100 requests** | 15 minutes | 429 |
 
-**Response (200):**
+### Rate Limit Headers
 
+Responses include rate limit info:
+
+```http
+X-RateLimit-Limit: 3
+X-RateLimit-Remaining: 2
+X-RateLimit-Reset: 1728409800
+```
+
+**Interpretation:**
+- `Limit`: Max requests allowed in window
+- `Remaining`: Requests left in current window
+- `Reset`: Unix timestamp when limit resets
+
+### Rate Limit Response
+
+When exceeded:
+
+```json
+{
+  "message": "Too many OTP requests, please try again later.",
+  "error": "RATE_LIMIT_EXCEEDED"
+}
+```
+
+**HTTP Status:** `429 Too Many Requests`
+
+---
+
+## 🧪 Testing the API
+
+### Health Check (No Auth)
+
+```bash
+curl https://m-s-m-p.onrender.com/health
+```
+
+**Expected:**
 ```json
 {
   "status": "OK",
-  "timestamp": "2025-01-07T10:00:00.000Z",
-  "uptime": "1d 2h 30m",
-  "version": "1.0.0"
+  "timestamp": "2025-10-08T17:30:00.000Z",
+  "environment": "production",
+  "allowedOrigins": [
+    "http://localhost:5173",
+    "https://m-s-m-p.vercel.app"
+  ]
 }
 ```
 
-### Test OTP (Development Only)
+---
 
-In test mode, OTPs are logged to console instead of being sent via SMS.
+### Full Authentication Flow (Postman/cURL)
 
-Check Render/Vercel logs for OTP values during testing.
+**Step 1: Request OTP**
+```bash
+curl -X POST https://m-s-m-p.onrender.com/api/auth/send-otp \
+  -H "Content-Type: application/json" \
+  -d '{"msisdn":"27812345678"}'
+```
+
+**Step 2: Check Render Logs for OTP**
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Click your service → "Logs"
+3. Look for boxed OTP output
+
+**Step 3: Verify OTP**
+```bash
+curl -X POST https://m-s-m-p.onrender.com/api/auth/verify-otp \
+  -H "Content-Type: application/json" \
+  -d '{"msisdn":"27812345678","otp":"123456"}'
+```
+
+**Step 4: Use Token**
+```bash
+# Save token from response
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Get services
+curl https://m-s-m-p.onrender.com/api/services \
+  -H "Authorization: Bearer $TOKEN"
+
+# Subscribe
+curl -X POST https://m-s-m-p.onrender.com/api/subscriptions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"serviceId":"68e06b840157e61e65942b14"}'
+```
+
+---
+
+### Postman Collection (Import Ready)
+
+Create `MSMP.postman_collection.json`:
+
+```json
+{
+  "info": {
+    "name": "MSMP API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://m-s-m-p.onrender.com/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/send-otp",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"msisdn\":\"27812345678\"}"
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/verify-otp",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"msisdn\":\"27812345678\",\"otp\":\"123456\"}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Import:** Postman → Import → Paste JSON
 
 ---
 
 ## 🔧 Environment Variables
 
-| Variable                | Description                     | Required |
-| ----------------------- | ------------------------------- | -------- |
-| `MONGODB_URI`           | MongoDB Atlas connection string | Yes      |
-| `JWT_SECRET`            | JWT signing secret (64+ chars)  | Yes      |
-| `CLIENT_URL`            | Frontend URL for CORS           | Yes      |
-| `TELCO_PROVIDER`        | Default telco provider          | No       |
-| `ADMIN_PASSWORD`        | Admin login password            | Yes      |
-| `EASYSENDSMS_API_KEY`   | SMS service API key             | No       |
-| `EASYSENDSMS_SENDER_ID` | SMS sender ID                   | No       |
-| `SMS_ENABLED`           | Enable real SMS sending         | No       |
-| `NODE_ENV`              | Environment mode                | No       |
-| `PORT`                  | Server port                     | No       |
+Backend configuration via environment variables.
+
+### Required Variables
+
+| Variable | Description | Example | Security |
+|----------|-------------|---------|----------|
+| `MONGODB_URI` | MongoDB Atlas connection string | `mongodb+srv://...` | 🔒 Secret |
+| `JWT_SECRET` | JWT signing key (64+ chars) | `0e935731a2da39d0...` | 🔒 Secret |
+| `CLIENT_URL` | Frontend URL for CORS | `https://m-s-m-p.vercel.app` | ✅ Public |
+| `ADMIN_PASSWORD` | Admin dashboard password | `SecurePassword123!` | 🔒 Secret |
+
+### Optional Variables
+
+| Variable | Description | Default | Production |
+|----------|-------------|---------|------------|
+| `PORT` | Server port | `5000` | Set by Render |
+| `NODE_ENV` | Environment mode | `development` | `production` |
+| `TELCO_PROVIDER` | Default telco | `Vodacom` | `Vodacom` |
+| `SMS_ENABLED` | Enable real SMS | `false` | `false` (test mode) |
+| `EASYSENDSMS_API_KEY` | SMS service API key | - | Required if `SMS_ENABLED=true` |
+| `EASYSENDSMS_SENDER_ID` | SMS sender name | `MSMP` | Your brand name |
+
+### Security Best Practices
+
+- ✅ Never commit `.env` to Git (use .gitignore)
+- ✅ Use 64+ character `JWT_SECRET` (generate with crypto)
+- ✅ Change default `ADMIN_PASSWORD` in production
+- ✅ Rotate secrets every 90 days
+- ✅ Use environment variable management (Render/Vercel dashboards)
 
 ---
 
-## 📝 Notes
+## 📚 Additional Resources
 
-- All monetary values are in cents (e.g., 299 = R2.99)
-- MSISDN should be in international format (278XXXXXXXXX)
-- JWT tokens expire after 24 hours
-- Admin endpoints require special admin JWT token
-- WebSocket connections require authentication
-- Rate limiting is enforced on all endpoints
-- CORS is configured for production domains
+### Documentation
+
+- **README.md** - Project overview, setup, tech stack
+- **DEPLOYMENT.md** - Step-by-step deployment guide
+- **API.md** - This file (complete API reference)
+
+### Live URLs
+
+- **Frontend:** [https://m-s-m-p.vercel.app](https://m-s-m-p.vercel.app)
+- **Backend:** [https://m-s-m-p.onrender.com](https://m-s-m-p.onrender.com)
+- **Health Check:** [https://m-s-m-p.onrender.com/health](https://m-s-m-p.onrender.com/health)
+- **GitHub:** [https://github.com/Mr-Akhil12/M.S.M.P](https://github.com/Mr-Akhil12/M.S.M.P)
+
+### Support
+
+- 📧 **Email:** [pillayakhil2@gmail.com](mailto:pillayakhil2@gmail.com)
+- 📱 **Phone:** 067 865 9396
+- 🐙 **GitHub Issues:** [Report a bug](https://github.com/Mr-Akhil12/M.S.M.P/issues)
 
 ---
 
-**API Documentation Complete! 📚**
+## 📝 Changelog
+
+### Version 1.0.0 (October 2025)
+
+**Initial Release:**
+- ✅ JWT authentication with OTP
+- ✅ Service management (list, details)
+- ✅ Subscription lifecycle (subscribe, cancel)
+- ✅ Transaction history
+- ✅ Admin analytics
+- ✅ Real-time updates via Socket.IO
+- ✅ Rate limiting on all endpoints
+- ✅ Production deployment (Vercel + Render)
+
+---
+
+<div align="center">
+
+**API Documentation Complete! 📡**
+
+---
+
+**Built with ❤️ by [AkhilDevs](https://github.com/Mr-Akhil12)**
+
+*Production-ready RESTful API with WebSocket support* ⚡
+

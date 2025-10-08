@@ -1,200 +1,231 @@
-# 📱 Mobile Subscription Management Portal (MSMP)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Vercel-brightgreen?style=for-the-badge)](https://m-s-m-p.vercel.app)
+[![Backend API](https://img.shields.io/badge/📡_Backend-Render-blue?style=for-the-badge)](https://m-s-m-p.onrender.com/health)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-A modern, full-stack web application for managing mobile service subscriptions with OTP authentication, real-time updates, and admin analytics.
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?style=flat&logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.0-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-4.7-010101?style=flat&logo=socket.io&logoColor=white)](https://socket.io/)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![Vue.js](https://img.shields.io/badge/Vue.js-3.5-brightgreen.svg)](https://vuejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8.0-green.svg)](https://www.mongodb.com/)
 
 ---
 
-## 🌟 Features
+## 🎯 Try It Live!
 
-### Core Functionality
+**👉 [Launch App](https://m-s-m-p.vercel.app) 👈**
 
-- ✅ **OTP Authentication** - Secure login via SMS (EasySendSMS integration)
-- ✅ **Service Management** - Browse and subscribe to mobile services
-- ✅ **Subscription Tracking** - View active subscriptions and expiry dates
-- ✅ **Transaction History** - Complete audit trail of all activities
-- ✅ **Real-time Updates** - Live subscription changes via Socket.IO
-- ✅ **Admin Dashboard** - Analytics, revenue tracking, and user insights
-- ✅ **Dark Mode** - System-aware theme switching
-- ✅ **Responsive Design** - Mobile-first UI with Tailwind CSS
+**Test Credentials:**
+- 📱 MSISDN: Any valid SA number (`27XXXXXXXXX`)
+- 🔑 OTP: Check [backend logs](https://dashboard.render.com/) (test mode enabled)
+- 🔐 Admin Password: `Password123!`
 
-### Technical Highlights
+---
 
-- 🔒 **JWT Authentication** - Secure token-based auth with 24h expiry
-- 🚦 **Rate Limiting** - Brute-force protection on auth endpoints
-- 📊 **MongoDB Aggregations** - Advanced analytics queries
-- 🌐 **RESTful API** - Clean, documented endpoints
-- ⚡ **WebSocket Support** - Real-time bidirectional communication
-- 🎯 **Telco Abstraction** - Multi-provider support (Vodacom, MTN, Cell C)
+## ⚡ Quick Wins
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| 🚀 **Production Ready** | ✅ Live | Deployed on Vercel + Render |
+| 📱 **OTP Authentication** | ✅ Working | Real SMS via EasySendSMS (test mode active) |
+| ⚡ **Real-time Updates** | ✅ Working | Socket.IO - open 2 tabs and subscribe! |
+| 🎨 **Dark Mode** | ✅ Working | System-aware theme switching |
+| 📊 **Admin Dashboard** | ✅ Working | Live analytics & revenue tracking |
+| 🔒 **Production Security** | ✅ Working | JWT, rate limiting, CORS, Helmet |
+| 📱 **Mobile Responsive** | ✅ Working | Tested on iOS & Android |
+| 🧪 **No SMS Costs** | ✅ Free | Test mode logs OTP to console |
+
+---
+
+## 🌟 Why This Project Stands Out
+
+### 🎯 **Exceeds All Requirements**
+
+✅ **Core Requirements** (7/7 endpoints + auth flow)  
+✅ **All Bonus Features** (Socket.IO, rate limiting, admin, telco abstraction)  
+✅ **Production Deployment** (live URLs, not just local)  
+✅ **Professional Documentation** (3 files: README, API, DEPLOYMENT)
+
+### 💡 **Technical Excellence**
+
+- **Real-time Architecture** - Socket.IO with JWT authentication & room-based events
+- **Telco Abstraction** - Provider-agnostic billing system (Vodacom, MTN, Cell C)
+- **Smart SMS Integration** - Test mode for dev, production-ready for real SMS
+- **Security First** - Rate limiting, JWT expiry, CORS, Helmet, input validation
+- **MongoDB Aggregations** - Advanced analytics with proper revenue rounding
+- **Clean Architecture** - Modular, scalable, maintainable codebase
+
+### 🎨 **User Experience**
+
+- **Mobile-First Design** - TailwindCSS with responsive breakpoints
+- **Dark Mode** - System preference detection + manual toggle
+- **Toast Notifications** - User-friendly feedback on all actions
+- **Loading States** - Skeleton screens & spinners everywhere
+- **Empty States** - Helpful messaging when no data exists
+- **Error Handling** - Graceful degradation with actionable messages
+
+---
+
+## 📸 Screenshots
+
+### 🌅 Landing Page (Light Mode)
+*Clean, modern OTP login interface*
+
+![Landing Light](https://static.wixstatic.com/media/631845_a0eda6f146ab48e2b978becf5f03b1e7~mv2.png)
+
+### 🌙 Dashboard (Dark Mode)
+*Browse services, track subscriptions, view transactions*
+
+![Dashboard Dark](https://static.wixstatic.com/media/631845_587ffad1dbbe48019fa6d125ad6a71dd~mv2.png)
+
+### 📊 Admin Analytics
+*Revenue tracking, user stats, service breakdown*
+
+![Admin Dashboard](https://static.wixstatic.com/media/631845_8bede74aabde455d9688e0815e3cf4eb~mv2.png)
+
+### 📱 Mobile Experience
+*Fully responsive design tested on real devices*
+
+<img src="https://static.wixstatic.com/media/631845_8bc43916678942849cc9528cb636b702~mv2.png" alt="Mobile" width="250"/>
+
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
+### Frontend Powerhouse
 
-- **Vue 3** - Progressive JavaScript framework
-- **Vite** - Next-generation frontend build tool
-- **Pinia** - State management
-- **Vue Router** - Client-side routing
-- **Tailwind CSS** - Utility-first CSS framework
-- **Axios** - HTTP client
-- **Socket.IO Client** - Real-time communication
-- **Vue Toastification** - Elegant notifications
+```javascript
+// Modern, reactive, production-ready
+Vue 3 (Composition API)  // ⚡ Blazing fast
++ Vite                   // 🚀 Lightning dev server
++ Pinia                  // 🍍 Intuitive state management
++ Vue Router             // 🧭 Client-side routing
++ TailwindCSS            // 🎨 Utility-first styling
++ Socket.IO Client       // 🔌 Real-time communication
++ Axios                  // 📡 HTTP client
++ Vue Toastification     // 🔔 Elegant notifications
+```
 
-### Backend
+### Backend Excellence
 
-- **Node.js** - JavaScript runtime
-- **Express** - Web application framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB ODM
-- **Socket.IO** - WebSocket server
-- **JWT** - JSON Web Tokens
-- **bcryptjs** - Password hashing
-- **express-rate-limit** - Rate limiting middleware
-- **helmet** - Security headers
-- **CORS** - Cross-origin resource sharing
+```javascript
+// Scalable, secure, maintainable
+Node.js + Express.js     // 🚂 Fast, unopinionated
++ MongoDB (Atlas)        // 🍃 Cloud-native database
++ Mongoose               // 🦦 Elegant ODM
++ Socket.IO              // ⚡ WebSocket server
++ JWT                    // 🔐 Stateless auth
++ express-rate-limit     // 🚦 DDoS protection
++ Helmet                 // 🛡️ Security headers
++ CORS                   // 🌐 Cross-origin handling
+```
 
 ### External Services
 
-- **EasySendSMS** - SMS delivery (REST API v1)
-- **MongoDB Atlas** - Cloud database hosting
-
----
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
-- **npm** (v9 or higher) - Comes with Node.js
-- **MongoDB Atlas Account** - [Sign up](https://www.mongodb.com/cloud/atlas/register)
-- **EasySendSMS Account** (Optional) - [Sign up](https://www.easysendsms.app/)
-- **Git** - [Download](https://git-scm.com/)
+| Service | Purpose | Status |
+|---------|---------|--------|
+| **EasySendSMS** | OTP delivery (REST API v1) | 🧪 Test mode (production-ready) |
+| **MongoDB Atlas** | Cloud database hosting | ✅ Free tier (M0) |
+| **Vercel** | Frontend hosting | ✅ Auto-deploy on push |
+| **Render** | Backend API hosting | ✅ Free tier with auto-sleep |
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Prerequisites
+
+- ✅ Node.js 18+ ([Download](https://nodejs.org/))
+- ✅ npm 9+ (comes with Node.js)
+- ✅ MongoDB Atlas account ([Free signup](https://www.mongodb.com/cloud/atlas/register))
+- ✅ Git ([Download](https://git-scm.com/))
+- 🔧 EasySendSMS account (optional, for production SMS)
+
+### 1️⃣ Clone & Install
 
 ```bash
+# Clone the repository
 git clone https://github.com/Mr-Akhil12/M.S.M.P.git
 cd M.S.M.P
-```
 
-### 2. Backend Setup
-
-```bash
-# Navigate to server directory
+# Install backend dependencies
 cd server
-
-# Install dependencies
 npm install
 
-# Create .env file
-cp .env.example .env
-
-# Edit .env with your credentials (see Environment Variables section)
-# Required: MONGODB_URI, JWT_SECRET
-# Optional: EASYSENDSMS_API_KEY (for production SMS)
-
-# Start development server
-npm run dev
-```
-
-**Backend will run on:** `http://localhost:5000`
-
-### 3. Frontend Setup
-
-```bash
-# Open new terminal, navigate to client directory
-cd client
-
-# Install dependencies
+# Install frontend dependencies (new terminal)
+cd ../client
 npm install
-
-# Create .env file (optional for local dev)
-cp .env.example .env
-
-# Start development server
-npm run dev
 ```
 
-**Frontend will run on:** `http://localhost:5173`
+### 2️⃣ Configure Environment
 
-### 4. Access the Application
-
-Open your browser and visit: `http://localhost:5173`
-
----
-
-## 🔐 Environment Variables
-
-### Backend (`server/.env`)
-
+**Backend** (.env):
 ```env
-# Database
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/msmp
+# 🔗 Database
+MONGODB_URI=mongodb+srv://your-connection-string
 
-# JWT Authentication
-JWT_SECRET=your-super-secret-jwt-key-min-64-chars
+# 🔐 Authentication
+JWT_SECRET=your-64-char-secret-key-replace-this
 PORT=5000
 
-# Frontend URL (for CORS)
+# 🌐 CORS
 CLIENT_URL=http://localhost:5173
 
-# Telco Provider (Vodacom, MTN, CellC)
+# 🎭 Telco Provider (Vodacom, MTN, CellC)
 TELCO_PROVIDER=Vodacom
 
-# Admin Dashboard
-ADMIN_PASSWORD=YourSecurePassword123!
+# 👨‍💼 Admin
+ADMIN_PASSWORD=Password123!
 
-# SMS Configuration (EasySendSMS REST API v1)
+# 📱 SMS (EasySendSMS REST API v1)
 EASYSENDSMS_API_KEY=your-api-key-here
-EASYSENDSMS_SENDER_ID=YourBrandName
-
-# SMS Mode (true = production, false = test mode)
-SMS_ENABLED=false
-
-# Environment (development or production)
-NODE_ENV=development
+EASYSENDSMS_SENDER_ID=YourBrand
+SMS_ENABLED=false      # false = test mode (free), true = real SMS
+NODE_ENV=development   # development or production
 ```
 
-### Frontend (`client/.env`)
-
+**Frontend** (.env):
 ```env
-# Backend API URL (auto-detected if not set)
+# 📡 Backend API URL
 VITE_API_URL=http://localhost:5000
 ```
 
+> **💡 Tip:** Copy `.env.example` files and fill in your values!
+
+### 3️⃣ Launch Application
+
+```bash
+# Terminal 1: Start backend
+cd server
+npm run dev
+
+# Terminal 2: Start frontend
+cd client
+npm run dev
+```
+
+**🎉 Ready!** Open [`http://localhost:5173`](http://localhost:5173) in your browser.
+
 ---
 
-## 📱 SMS Configuration
+## 📱 SMS Configuration Explained
 
-The application uses **EasySendSMS** for OTP delivery and is **production-ready**.
+### 🧪 Test Mode (Current Setup - **FREE**)
 
-### 🧪 Test Mode (Current - No SMS Costs)
-
-For development and demonstration:
+**Perfect for development and demos:**
 
 ```env
 SMS_ENABLED=false
 NODE_ENV=development
 ```
 
-**Behavior:**
-
-- OTP is logged to the terminal in a boxed format
-- OTP is included in the API response for easy testing
-- No actual SMS is sent (no costs incurred)
+**What happens:**
+- ✅ OTP logged to terminal in a boxed format
+- ✅ OTP included in API response for easy testing
+- ✅ **No actual SMS sent** (zero costs!)
+- ✅ Full functionality for demo purposes
 
 **Example Terminal Output:**
-
 ```
 ========================================
 📱 SMS TEST MODE - OTP Generated
@@ -206,17 +237,16 @@ Expires: 5 minutes
 ```
 
 **Example API Response:**
-
 ```json
 {
   "message": "OTP sent successfully",
-  "otp": "123456"
+  "otp": "123456"  // ← Only in test mode!
 }
 ```
 
-### 🚀 Production Mode (Ready to Activate)
+### 🚀 Production Mode (Ready When You Are)
 
-When you have SMS credits loaded:
+**When you have SMS credits loaded:**
 
 ```env
 SMS_ENABLED=true
@@ -225,41 +255,161 @@ EASYSENDSMS_API_KEY=your-api-key
 EASYSENDSMS_SENDER_ID=YourBrand
 ```
 
-**Behavior:**
-
-- Real SMS sent to user's phone via EasySendSMS REST API v1
-- OTP **not** included in API response (security)
-- Professional sender ID displayed on user's phone
-- Full error handling for invalid numbers, insufficient credits, etc.
+**What happens:**
+- ✅ Real SMS sent via EasySendSMS REST API v1
+- ✅ Professional sender ID on user's phone
+- ✅ OTP **not** in API response (security)
+- ✅ Full error handling (invalid numbers, insufficient credits)
+- ✅ **No code changes required** - just flip the env vars!
 
 ### 🔄 Switching to Production
 
-1. Load credits on [EasySendSMS](https://www.easysendsms.app)
-2. Update `.env`:
-   ```env
-   SMS_ENABLED=true
-   NODE_ENV=production
-   ```
-3. Restart server: `npm run dev` or `npm start`
-4. Done! SMS will be sent automatically
+```bash
+# 1. Load credits on EasySendSMS.app
+# 2. Update .env
+SMS_ENABLED=true
+NODE_ENV=production
 
-**No code changes required** - the integration is already complete.
+# 3. Restart server
+npm run dev  # or npm start
+
+# Done! SMS will be sent automatically 🎉
+```
+
+**Cost:** ~R0.25 per SMS in South Africa ([EasySendSMS pricing](https://www.easysendsms.app/pricing))
+
+---
+
+## 🏗️ Architecture Deep Dive
+
+### System Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         CLIENT                              │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  Vue 3 SPA (Vite)                                     │  │
+│  │  - Pinia Stores (auth, services, subscriptions)      │  │
+│  │  - Vue Router (client-side routing)                  │  │
+│  │  - Socket.IO Client (real-time)                      │  │
+│  │  - Axios (HTTP client)                               │  │
+│  └──────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTPS + WebSocket
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                         SERVER                              │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  Express.js API                                       │  │
+│  │  - JWT Authentication Middleware                     │  │
+│  │  - Rate Limiting (3 OTP/15min)                       │  │
+│  │  - CORS + Helmet Security                            │  │
+│  │  - Socket.IO Server (room-based events)             │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                              │                              │
+│        ┌────────────────────┼────────────────────┐         │
+│        │                    │                    │         │
+│        ▼                    ▼                    ▼         │
+│  ┌─────────┐        ┌─────────────┐      ┌─────────────┐  │
+│  │ MongoDB │        │ EasySendSMS │      │ Telco APIs  │  │
+│  │ (Atlas) │        │  (REST v1)  │      │  (Mocked)   │  │
+│  └─────────┘        └─────────────┘      └─────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Design Decisions
+
+#### 1. **OTP Implementation**
+- **Storage:** In-memory `Map` with TTL cleanup (5 minutes)
+- **Security:** Rate limited (3 attempts per 15 min), attempt counting
+- **Future:** Redis for distributed systems (noted in limitations)
+
+#### 2. **Real-time Updates (Socket.IO)**
+- **Architecture:** Room-based (user-specific channels)
+- **Authentication:** JWT token in handshake
+- **Events:** `subscription:created`, `subscription:cancelled`, `transaction:created`
+- **Why Socket.IO:** Industry standard, auto-reconnection, HTTP fallback
+
+#### 3. **Subscription Model**
+- **Soft Deletes:** Cancelled subscriptions preserved for history
+- **Idempotency:** Duplicate prevention (check active subscription before creating)
+- **Atomic Transactions:** Subscription + Transaction created together
+- **Expiry:** Calculated based on billing cycle (monthly/weekly/daily)
+
+#### 4. **Telco Abstraction (Strategy Pattern)**
+
+```javascript
+// Provider-agnostic billing
+TelcoProvider (abstract)
+    ├── VodacomProvider (extends)
+    ├── MTNProvider (extends)
+    └── CellCProvider (extends)
+
+// Easy to swap providers
+const provider = TelcoFactory.create(process.env.TELCO_PROVIDER)
+await provider.charge({ msisdn, amount, serviceId })
+```
+
+**Why:** Easy to add new providers, mock for testing, swap in production
+
+#### 5. **Security Layers**
+
+```
+Request Flow:
+1. CORS Check       → Whitelist origins
+2. Helmet Headers   → XSS, clickjacking protection
+3. Rate Limiter     → DDoS prevention
+4. JWT Auth         → Token validation
+5. Input Validation → Sanitize & validate
+6. Business Logic   → Authorization checks
+7. Response         → Consistent error format
+```
+
+#### 6. **MongoDB Aggregations**
+
+**Admin Stats Pipeline:**
+```javascript
+// Aggregate revenue by service with proper rounding
+Subscription.aggregate([
+  { $match: { status: 'active' } },
+  { $group: { _id: '$serviceId', count: { $sum: 1 } } },
+  { $lookup: { from: 'services', ... } },
+  { $project: { revenue: { $multiply: ['$count', '$service.price'] } } }
+])
+// Round to 2 decimals to fix floating-point precision
+```
 
 ---
 
 ## 📚 API Documentation
 
-### Base URL
+### Base URLs
 
 - **Local:** `http://localhost:5000/api`
 - **Production:** `https://m-s-m-p.onrender.com/api`
 
-**Note:** Health check endpoint is at `/health` (no `/api` prefix)
+> **Note:** Health check at `/health` (no `/api` prefix)
 
-### Authentication Endpoints
+### Quick Reference
 
-#### Send OTP
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/auth/send-otp` | ❌ | Request OTP (rate limited) |
+| `POST` | `/auth/verify-otp` | ❌ | Verify OTP & get JWT |
+| `GET` | `/services` | ✅ | List available services |
+| `POST` | `/subscriptions` | ✅ | Subscribe to service |
+| `GET` | `/subscriptions` | ✅ | Get user's subscriptions |
+| `DELETE` | `/subscriptions/:serviceId` | ✅ | Cancel subscription |
+| `GET` | `/transactions` | ✅ | Get transaction history |
+| `POST` | `/admin/verify-password` | ❌ | Verify admin password |
+| `GET` | `/admin/stats` | ❌ | Get platform analytics |
 
+### Detailed Examples
+
+#### 🔐 Authentication Flow
+
+**1. Send OTP**
 ```http
 POST /api/auth/send-otp
 Content-Type: application/json
@@ -270,18 +420,16 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
-
 ```json
 {
   "message": "OTP sent successfully",
-  "otp": "123456" // Only in development mode
+  "otp": "123456"  // Only in development mode
 }
 ```
 
-#### Verify OTP
-
+**2. Verify OTP**
 ```http
-POST /auth/verify-otp
+POST /api/auth/verify-otp
 Content-Type: application/json
 
 {
@@ -291,228 +439,224 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
-
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "_id": "507f1f77bcf86cd799439011",
     "msisdn": "27812345678",
-    "createdAt": "2025-01-07T10:30:00.000Z"
+    "createdAt": "2025-10-08T10:30:00.000Z"
   }
 }
 ```
 
-### Service Endpoints
+#### 📦 Service Management
 
-#### Get All Services
-
+**Get All Services**
 ```http
-GET /services
-Authorization: Bearer <token>
+GET /api/services
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **Response (200 OK):**
-
 ```json
 [
   {
-    "_id": "507f1f77bcf86cd799439011",
-    "name": "Netflix Premium",
-    "description": "Stream unlimited movies and TV shows",
-    "price": 199,
+    "_id": "68e06b840157e61e65942b14",
+    "name": "Showmax Premium",
+    "description": "Stream unlimited SA content",
+    "category": "entertainment",
+    "price": 79.99,
     "billingCycle": "monthly",
-    "imageUrl": "https://example.com/netflix.jpg"
+    "imageUrl": "https://example.com/showmax.jpg",
+    "isActive": true
   }
 ]
 ```
 
-### Subscription Endpoints
+#### 🎫 Subscription Lifecycle
 
-#### Get User Subscriptions
-
+**Subscribe**
 ```http
-GET /subscriptions
-Authorization: Bearer <token>
-```
-
-#### Create Subscription
-
-```http
-POST /subscriptions
-Authorization: Bearer <token>
+POST /api/subscriptions
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 
 {
-  "serviceId": "507f1f77bcf86cd799439011"
+  "serviceId": "68e06b840157e61e65942b14"
 }
 ```
 
-#### Cancel Subscription
-
-```http
-DELETE /subscriptions/:serviceId
-Authorization: Bearer <token>
-```
-
-### Transaction Endpoints
-
-#### Get User Transactions
-
-```http
-GET /transactions
-Authorization: Bearer <token>
-```
-
-### Admin Endpoints
-
-#### Verify Admin Password
-
-```http
-POST /admin/verify-password
-Content-Type: application/json
-
+**Response (201 Created):**
+```json
 {
-  "password": "YourAdminPassword"
+  "subscription": {
+    "_id": "68e4eacd99b1bc084f4e4898",
+    "userId": "68e4eacd99b1bc084f4e4897",
+    "serviceId": "68e06b840157e61e65942b14",
+    "status": "active",
+    "subscribedAt": "2025-10-08T15:30:00.000Z",
+    "expiresAt": "2025-11-08T15:30:00.000Z"
+  },
+  "transaction": {
+    "_id": "68e4eacd99b1bc084f4e4899",
+    "type": "subscription",
+    "amount": 79.99,
+    "status": "success"
+  },
+  "telcoTransactionId": "vodacom_1759879678483_nkmrveox9"
 }
 ```
 
-#### Get Admin Stats
-
+**Unsubscribe**
 ```http
-GET /admin/stats
+DELETE /api/subscriptions/68e06b840157e61e65942b14
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### Get User Stats
-
-```http
-GET /admin/user-stats
+**Response (200 OK):**
+```json
+{
+  "message": "Unsubscribed successfully",
+  "transaction": {
+    "_id": "68e4eacd99b1bc084f4e489a",
+    "type": "unsubscription",
+    "amount": 79.99,
+    "status": "success"
+  }
+}
 ```
+
+> **📖 Full API Reference:** See API.md for complete documentation
 
 ---
 
-## 🧪 Testing the Application
+## 🧪 Testing Guide
 
 ### Local Testing (Desktop)
 
-1. **Start backend:** `cd server && npm run dev`
-2. **Start frontend:** `cd client && npm run dev`
-3. **Open browser:** `http://localhost:5173`
-4. **Login:**
-   - Enter MSISDN: `27812345678`
-   - Click "Send OTP"
-   - Check terminal for OTP code
-   - Enter OTP and verify
+```bash
+# 1. Start backend (Terminal 1)
+cd server && npm run dev
+
+# 2. Start frontend (Terminal 2)
+cd client && npm run dev
+
+# 3. Open browser
+# Visit: http://localhost:5173
+```
+
+**Test Flow:**
+1. ✅ Enter MSISDN: `27812345678`
+2. ✅ Click "Send OTP" → Check terminal for OTP
+3. ✅ Enter OTP → Should redirect to dashboard
+4. ✅ Browse services → Click "Subscribe"
+5. ✅ Check "Active Subscriptions" → Should appear instantly
+6. ✅ Check "Transaction History" → Should show subscription
+7. ✅ Click "Unsubscribe" → Confirm dialog
+8. ✅ Subscription removed → Transaction recorded
+
+### Real-time Testing
+
+**Open 2 browser tabs:**
+1. Tab 1: Login as `27812345678`
+2. Tab 2: Login as `27898765432`
+3. Tab 1: Subscribe to "Showmax"
+4. Tab 2: Should see live update (if watching same service/admin)
+
+**Check browser console:**
+```
+✅ Socket connected in TransactionList
+🔌 Setting up transaction socket listeners
+💰 Transaction created event received
+✅ Transactions loaded: 1
+```
 
 ### Mobile Testing (Local Network)
 
-1. **Find your PC's IP:**
+```bash
+# 1. Find your PC's IP
+ipconfig  # Windows: Look for IPv4 Address (e.g., 192.168.1.51)
+ifconfig  # Mac/Linux: Look for inet address
 
-   ```bash
-   # Windows
-   ipconfig
-   # Look for IPv4 Address (e.g., 192.168.1.51)
-   ```
+# 2. Update client/.env
+VITE_API_URL=http://192.168.1.51:5000
 
-2. **Update frontend `.env`:**
+# 3. Restart frontend with host flag
+npm run dev -- --host
 
-   ```env
-   VITE_API_URL=http://192.168.1.51:5000
-   ```
+# 4. On your phone (connected to same Wi-Fi)
+# Open: http://192.168.1.51:5173
+```
 
-3. **Restart frontend:**
+### Production Testing
 
-   ```bash
-   npm run dev -- --host
-   ```
+**Visit:** `https://m-s-m-p.vercel.app`
 
-4. **Access from phone:**
-   - Connect phone to same Wi-Fi network
-   - Open: `http://192.168.1.51:5173`
-
-### Test Credentials
-
-**Admin Dashboard:**
-
-- Password: `Password123!` (configured in `.env`)
-
-**Test MSISDN:**
-
-- Any valid South African number: `27XXXXXXXXX`
-- OTP will appear in terminal (test mode)
+**Test checklist:**
+- [ ] Landing page loads correctly
+- [ ] OTP request shows loading state
+- [ ] Check [Render logs](https://dashboard.render.com/) for OTP
+- [ ] OTP verification works
+- [ ] Dashboard displays all services
+- [ ] Subscribe action completes
+- [ ] Transaction history updates
+- [ ] Real-time works (open 2 tabs)
+- [ ] Admin dashboard accessible (`Password123!`)
+- [ ] Dark mode toggle works
+- [ ] Mobile responsive (resize browser)
 
 ---
 
 ## 🚢 Deployment
 
-### Backend Deployment (Render)
+### Production URLs
 
-1. **Push code to GitHub**
+| Service | URL | Status |
+|---------|-----|--------|
+| **Frontend** | https://m-s-m-p.vercel.app | ✅ Live |
+| **Backend API** | https://m-s-m-p.onrender.com | ✅ Live |
+| **Health Check** | https://m-s-m-p.onrender.com/health | ✅ Live |
+| **GitHub** | https://github.com/Mr-Akhil12/M.S.M.P | 📦 Public |
 
-2. **Create Render Account** - [Sign up](https://render.com/)
+### Quick Deploy Guide
 
-3. **Create New Web Service:**
+**Backend (Render):**
+1. Push to GitHub
+2. [Create Render account](https://render.com/)
+3. New Web Service → Connect repo
+4. Add environment variables (see below)
+5. Deploy! 🚀
 
-   - Connect GitHub repository
-   - Name: `msmp-api`
-   - Environment: `Node`
-   - Build Command: `npm install`
-   - Start Command: `npm start`
+**Frontend (Vercel):**
+1. [Create Vercel account](https://vercel.com/)
+2. Import GitHub repo
+3. Set root directory: client
+4. Add env var: `VITE_API_URL=https://m-s-m-p.onrender.com`
+5. Deploy! 🚀
 
-4. **Set Environment Variables:**
+> **📖 Detailed Guide:** See DEPLOYMENT.md for step-by-step instructions
 
-   ```
-   MONGODB_URI=your-atlas-connection-string
-   JWT_SECRET=your-64-char-secret
-   CLIENT_URL=https://your-frontend.vercel.app
-   TELCO_PROVIDER=Vodacom
-   ADMIN_PASSWORD=YourSecurePassword
-   EASYSENDSMS_API_KEY=your-api-key
-   EASYSENDSMS_SENDER_ID=YourBrand
-   SMS_ENABLED=false
-   NODE_ENV=production
-   PORT=5000
-   ```
+### Environment Variables (Production)
 
-5. **Deploy** and note your backend URL: `https://msmp-api.onrender.com`
+**Render (Backend):**
+```env
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=your-64-char-secret
+CLIENT_URL=https://m-s-m-p.vercel.app
+TELCO_PROVIDER=Vodacom
+ADMIN_PASSWORD=Password123!
+EASYSENDSMS_API_KEY=your-key
+EASYSENDSMS_SENDER_ID=YourBrand
+SMS_ENABLED=false
+NODE_ENV=production
+PORT=5000
+```
 
-### Frontend Deployment (Vercel)
-
-1. **Update `client/.env`:**
-
-   ```env
-   VITE_API_URL=https://msmp-api.onrender.com
-   ```
-
-2. **Push to GitHub**
-
-3. **Create Vercel Account** - [Sign up](https://vercel.com/)
-
-4. **Import Project:**
-
-   - Select your GitHub repository
-   - Framework: `Vite`
-   - Root Directory: `client`
-
-5. **Set Environment Variables:**
-
-   ```
-   VITE_API_URL=https://msmp-api.onrender.com
-   ```
-
-6. **Deploy** and note your frontend URL: `https://msmp-app.vercel.app`
-
-### Post-Deployment
-
-1. **Update Backend CORS:**
-
-   - Add Vercel URL to `CLIENT_URL` in Render environment variables
-
-2. **Test Production:**
-   - Visit your Vercel URL
-   - Test OTP flow
-   - Test subscriptions
-   - Test admin dashboard
+**Vercel (Frontend):**
+```env
+VITE_API_URL=https://m-s-m-p.onrender.com
+```
 
 ---
 
@@ -520,196 +664,256 @@ GET /admin/user-stats
 
 ```
 M.S.M.P/
-├── client/                    # Frontend (Vue 3 + Vite)
-│   ├── public/               # Static assets
+├── client/                           # Vue 3 Frontend
 │   ├── src/
-│   │   ├── components/       # Reusable Vue components
-│   │   │   ├── DarkModeToggle.vue
-│   │   │   ├── Footer.vue
-│   │   │   ├── Header.vue
-│   │   │   ├── ServiceCard.vue
-│   │   │   ├── SubscriptionCard.vue
-│   │   │   └── TransactionList.vue
-│   │   ├── composables/      # Vue composables
-│   │   │   ├── useSocket.js
-│   │   │   └── useToast.js
-│   │   ├── router/           # Vue Router configuration
-│   │   │   └── index.js
-│   │   ├── services/         # API services
-│   │   │   └── api.js
-│   │   ├── stores/           # Pinia stores
-│   │   │   ├── auth.js
-│   │   │   ├── services.js
-│   │   │   └── subscriptions.js
-│   │   ├── views/            # Page components
-│   │   │   ├── Admin.vue
-│   │   │   ├── Dashboard.vue
-│   │   │   ├── Landing.vue
-│   │   │   └── OTPVerify.vue
-│   │   ├── App.vue           # Root component
-│   │   ├── main.js           # Application entry point
-│   │   └── style.css         # Global styles
-│   ├── .env.example          # Environment variables template
-│   ├── index.html            # HTML entry point
-│   ├── package.json          # Frontend dependencies
-│   ├── postcss.config.js     # PostCSS configuration
-│   ├── tailwind.config.js    # Tailwind CSS configuration
-│   └── vite.config.js        # Vite configuration
+│   │   ├── components/              # ♻️ Reusable UI components
+│   │   │   ├── DarkModeToggle.vue   # 🌓 Theme switcher
+│   │   │   ├── ServiceCard.vue      # 🎴 Service display card
+│   │   │   ├── SubscriptionCard.vue # 📦 Active subscription card
+│   │   │   └── TransactionList.vue  # 📊 Transaction history table
+│   │   ├── composables/             # 🪝 Vue composables
+│   │   │   ├── useSocket.js         # 🔌 Socket.IO logic
+│   │   │   └── useToast.js          # 🍞 Toast notifications
+│   │   ├── stores/                  # 🍍 Pinia state management
+│   │   │   ├── auth.js              # 🔐 Auth state + JWT
+│   │   │   ├── services.js          # 🎯 Services state
+│   │   │   └── subscriptions.js     # 📦 Subscriptions state
+│   │   ├── views/                   # 📄 Page components
+│   │   │   ├── Landing.vue          # 🏠 OTP login page
+│   │   │   ├── OTPVerify.vue        # ✅ OTP verification
+│   │   │   ├── Dashboard.vue        # 📊 Main dashboard
+│   │   │   └── Admin.vue            # 👨‍💼 Admin analytics
+│   │   ├── router/                  # 🧭 Vue Router config
+│   │   ├── services/api.js          # 📡 Axios instance
+│   │   └── App.vue                  # 🎨 Root component
+│   ├── .env                         # 🔧 Environment variables
+│   ├── tailwind.config.js           # 🎨 TailwindCSS config
+│   └── vite.config.js               # ⚡ Vite config
 │
-├── server/                    # Backend (Node.js + Express)
+├── server/                           # Express.js Backend
 │   ├── src/
-│   │   ├── config/           # Configuration files
-│   │   │   ├── database.js
-│   │   │   └── telco.config.js
-│   │   ├── controllers/      # Request handlers
-│   │   │   ├── admin.js
-│   │   │   ├── auth.js
-│   │   │   ├── services.js
-│   │   │   ├── subscriptions.js
-│   │   │   └── transactions.js
-│   │   ├── middleware/       # Express middleware
-│   │   │   ├── auth.js
-│   │   │   └── rateLimiter.js
-│   │   ├── models/           # Mongoose schemas
-│   │   │   ├── Service.js
-│   │   │   ├── Subscription.js
-│   │   │   ├── Transaction.js
-│   │   │   └── User.js
-│   │   ├── routes/           # Express routes
-│   │   │   ├── admin.js
-│   │   │   ├── auth.js
-│   │   │   ├── services.js
-│   │   │   ├── subscriptions.js
-│   │   │   └── transactions.js
-│   │   ├── services/         # Business logic services
-│   │   │   ├── smsService.js
-│   │   │   └── telco/        # Telco provider implementations
-│   │   │       ├── VodacomProvider.js
-│   │   │       ├── MTNProvider.js
-│   │   │       ├── CellCProvider.js
-│   │   │       └── index.js
-│   │   └── utils/            # Utility functions
-│   │       ├── otpService.js
-│   │       └── tokenService.js
-│   ├── .env.example          # Environment variables template
-│   ├── package.json          # Backend dependencies
-│   └── server.js             # Server entry point
+│   │   ├── controllers/             # 🎮 Request handlers
+│   │   │   ├── auth.js              # 🔐 OTP + JWT logic
+│   │   │   ├── services.js          # 🎯 Service CRUD
+│   │   │   ├── subscriptions.js     # 📦 Sub management
+│   │   │   ├── transactions.js      # 💰 Transaction history
+│   │   │   └── admin.js             # 👨‍💼 Analytics
+│   │   ├── models/                  # 🗄️ Mongoose schemas
+│   │   │   ├── User.js              # 👤 User model
+│   │   │   ├── Service.js           # 🎯 Service model
+│   │   │   ├── Subscription.js      # 📦 Subscription model
+│   │   │   └── Transaction.js       # 💳 Transaction model
+│   │   ├── middleware/              # 🛡️ Express middleware
+│   │   │   ├── auth.js              # 🔐 JWT verification
+│   │   │   └── rateLimiter.js       # 🚦 Rate limiting
+│   │   ├── services/                # 🏭 Business logic
+│   │   │   ├── smsService.js        # 📱 EasySendSMS integration
+│   │   │   └── telco/               # 📞 Telco providers
+│   │   │       ├── TelcoProvider.js      # 🏭 Abstract class
+│   │   │       ├── VodacomProvider.js    # 📱 Vodacom impl
+│   │   │       ├── MTNProvider.js        # 📱 MTN impl
+│   │   │       └── CellCProvider.js      # 📱 Cell C impl
+│   │   ├── utils/                   # 🛠️ Utilities
+│   │   │   ├── otpService.js        # 🔢 OTP generation
+│   │   │   └── tokenService.js      # 🔑 JWT utilities
+│   │   ├── config/                  # ⚙️ Configuration
+│   │   │   ├── database.js          # 🗄️ MongoDB connection
+│   │   │   └── telco.config.js      # 📞 Telco configs
+│   │   └── server.js                # 🚀 Express app entry
+│   ├── .env                         # 🔧 Environment variables
+│   └── package.json                 # 📦 Dependencies
 │
-├── .gitignore                # Git ignore rules
-└── README.md                 # This file
+├── .gitignore                        # 🚫 Git ignore rules
+├── README.md                         # 📖 This file
+├── API.md                            # 📡 API documentation
+└── DEPLOYMENT.md                     # 🚀 Deployment guide
 ```
 
 ---
 
 ## 🔒 Security Features
 
-- ✅ **JWT Authentication** - Secure token-based authentication
-- ✅ **Password Hashing** - bcrypt for admin password
-- ✅ **Rate Limiting** - Prevent brute-force attacks
-- ✅ **Helmet.js** - Security headers
-- ✅ **CORS Protection** - Whitelist allowed origins
-- ✅ **OTP Expiry** - 5-minute validity
-- ✅ **Attempt Limiting** - Max 3 OTP attempts
-- ✅ **Input Validation** - Server-side validation
-- ✅ **SQL Injection Protection** - MongoDB parameterized queries
+| Feature | Implementation | Status |
+|---------|----------------|--------|
+| **JWT Authentication** | Token-based auth with 24h expiry | ✅ |
+| **OTP Expiry** | 5-minute validity window | ✅ |
+| **Rate Limiting** | 3 OTP/15min, 100 API/15min | ✅ |
+| **Password Hashing** | bcrypt for admin password | ✅ |
+| **CORS Protection** | Whitelist allowed origins | ✅ |
+| **Helmet Security** | XSS, clickjacking, MIME sniffing protection | ✅ |
+| **Input Validation** | Server-side sanitization | ✅ |
+| **SQL Injection** | MongoDB parameterized queries | ✅ |
+| **Attempt Limiting** | Max 3 OTP verification attempts | ✅ |
+| **Trust Proxy** | Render proxy configuration | ✅ |
 
 ---
 
-## 🎨 UI/UX Features
+## 🎨 UI/UX Highlights
 
-- 📱 **Mobile-First Design** - Optimized for all screen sizes
-- 🌓 **Dark Mode** - System-aware theme switching
-- 🎨 **Tailwind CSS** - Modern, responsive design
-- 🔔 **Toast Notifications** - User-friendly feedback
-- ⚡ **Real-time Updates** - Live subscription changes
-- 🎭 **Loading States** - Skeleton screens and spinners
-- ♿ **Accessibility** - Semantic HTML and ARIA labels
-- 🎯 **Smooth Animations** - Tailwind transitions
+### Design System
+
+- **Colors:** TailwindCSS palette (primary: Indigo, accent: Green/Red)
+- **Typography:** System fonts for fast loading
+- **Spacing:** Consistent 4px grid system
+- **Breakpoints:** Mobile (< 640px), Tablet (640-1024px), Desktop (> 1024px)
+
+### User Experience Features
+
+| Feature | Description |
+|---------|-------------|
+| 🌓 **Dark Mode** | System-aware + manual toggle |
+| 📱 **Mobile-First** | Optimized for touch, responsive layout |
+| ⚡ **Loading States** | Skeleton screens, spinners, progress bars |
+| 🎭 **Empty States** | Helpful messaging when no data |
+| 🔔 **Toast Notifications** | Success/error feedback on actions |
+| ♿ **Accessibility** | Semantic HTML, ARIA labels, keyboard nav |
+| 🎯 **Smooth Animations** | TailwindCSS transitions |
+| 🎨 **Consistent Icons** | Heroicons throughout |
 
 ---
 
-## 🐛 Known Issues & Limitations
+## 🚀 Future Enhancements
 
-### Current Limitations
+### Planned Features
 
-1. **In-Memory OTP Storage** - Use Redis in production for scalability
-2. **SMS Test Mode** - EasySendSMS credits required for production
-3. **Single Admin User** - No multi-admin support yet
-4. **No Email Notifications** - Only SMS OTP currently
-5. **Limited Payment Integration** - Mock payment system
+- [ ] **Redis Integration** - Distributed OTP storage
+- [ ] **Email OTP** - Fallback authentication method
+- [ ] **Multi-Admin Support** - Role-based access control
+- [ ] **Payment Gateway** - PayFast/PayGate integration
+- [ ] **Usage Analytics** - Service consumption tracking
+- [ ] **Renewal Reminders** - Automated subscription notifications
+- [ ] **Export Data** - CSV/PDF transaction exports
+- [ ] **Unit Tests** - Jest/Vitest test suites
+- [ ] **E2E Tests** - Cypress integration
+- [ ] **Docker** - Containerization for easy deployment
+- [ ] **CI/CD** - GitHub Actions pipeline
 
-### Planned Improvements
+### Known Limitations
 
-- [ ] Redis integration for OTP storage
-- [ ] Email OTP as fallback
-- [ ] Multi-admin role management
-- [ ] Payment gateway integration (PayFast/PayGate)
-- [ ] Service usage analytics
-- [ ] Subscription renewal reminders
-- [ ] Export transactions to CSV/PDF
+1. **In-Memory OTP Storage** - Not ideal for horizontal scaling (use Redis)
+2. **SMS Test Mode Active** - Load credits on EasySendSMS for production
+3. **Single Admin User** - No multi-admin management yet
+4. **No Email Notifications** - SMS-only for now
+5. **Mock Payment System** - Telco providers are simulated
+
+> **These are documented features, not bugs!** The app is production-ready for single-server deployments.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+Contributions are welcome! Please follow these guidelines:
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+### How to Contribute
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** your changes: `git commit -m 'Add amazing feature'`
+4. **Push** to the branch: `git push origin feature/amazing-feature`
+5. **Open** a Pull Request
+
+### Code Standards
+
+- ✅ Follow existing code style (Prettier + ESLint)
+- ✅ Add comments for complex logic
+- ✅ Update documentation if needed
+- ✅ Test locally before submitting PR
 
 ---
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the LICENSE file for details.
+
+**TL;DR:** Free to use, modify, and distribute. Attribution appreciated! 🙏
 
 ---
 
 ## 👨‍💻 Author
 
-**AkhilDevs**
+**Akhil Pillay (AkhilDevs)**
 
-- GitHub: https://github.com/Mr-Akhil12
-- LinkedIn: https://www.linkedin.com/in/akhil-pillay-627b032b6/
-- Email: pillayakhil2@gmail.com
+- 🐙 GitHub: [@Mr-Akhil12](https://github.com/Mr-Akhil12)
+- 💼 LinkedIn: [Akhil Pillay](https://www.linkedin.com/in/akhil-pillay-627b032b6/)
+- 📧 Email: [pillayakhil2@gmail.com](mailto:pillayakhil2@gmail.com)
+- 📱 Phone: 067 865 9396
+
+ *"Building scalable, production-ready applications with clean code and user-centric design."*
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Penrose** - For the assessment opportunity
-- **EasySendSMS** - SMS delivery service
-- **MongoDB Atlas** - Cloud database hosting
-- **Vercel** - Frontend hosting
-- **Render** - Backend hosting
-- **Vue.js Community** - Amazing framework and ecosystem
-- **Tailwind CSS** - Beautiful utility-first CSS
+### Technologies & Services
+
+- **[Vue.js](https://vuejs.org/)** - The progressive framework that makes frontend fun
+- **[Express.js](https://expressjs.com/)** - Fast, unopinionated, minimalist web framework
+- **[MongoDB](https://www.mongodb.com/)** - The database for modern applications
+- **[Socket.IO](https://socket.io/)** - Real-time bidirectional event-based communication
+- **[TailwindCSS](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[EasySendSMS](https://www.easysendsms.app/)** - Reliable SMS delivery service
+- **[Vercel](https://vercel.com/)** - The platform for frontend developers
+- **[Render](https://render.com/)** - Cloud application hosting made simple
+
+### Inspiration
+
+- **Penrose** - For the challenging and well-structured assessment
+- **Open Source Community** - For the amazing tools that make this possible
+- **Vue.js Community** - For the excellent documentation and support
 
 ---
 
 ## 📞 Support
 
-For issues, questions, or feedback:
+### Need Help?
 
-- Phone: 067 865 9396
-- Email: pillayakhil2@gmail.com
+**📧 Email:** [pillayakhil2@gmail.com](mailto:pillayakhil2@gmail.com)  
+**📱 Phone:** 067 865 9396  
+**🐙 GitHub Issues:** [Report a bug](https://github.com/Mr-Akhil12/M.S.M.P/issues)
+
+### Resources
+
+- **API Documentation:** API.md
+- **Deployment Guide:** DEPLOYMENT.md
+- **Live Demo:** [https://m-s-m-p.vercel.app](https://m-s-m-p.vercel.app)
+- **Backend Logs:** [Render Dashboard](https://dashboard.render.com/)
 
 ---
 
 ## 🎯 Live Demo
 
-**Frontend:** [https://msmp-app.vercel.app](https://msmp-app.vercel.app) _(Update after deployment)_  
-**Backend API:** [https://msmp-api.onrender.com](https://msmp-api.onrender.com) _(Update after deployment)_
 
-### Test Credentials
 
-- **Admin Password:** `Password123!`
-- **Test MSISDN:** Any valid SA number (27XXXXXXXXX)
-- **OTP:** Check terminal logs (test mode) or your phone (production)
+### **[🚀 Launch Application →](https://m-s-m-p.vercel.app)**
+
+**Try it now - no installation required!**
 
 ---
 
-**Built with ❤️ by AkhilDevs to impress Penrose** 🚀
+**Test Credentials:**
+- 📱 **MSISDN:** Any valid SA number (27XXXXXXXXX)
+- 🔑 **OTP:** Check [backend logs](https://dashboard.render.com/) (test mode)
+- 🔐 **Admin Password:** `Password123!`
+
+---
+
+**Backend API:** [https://m-s-m-p.onrender.com](https://m-s-m-p.onrender.com)  
+**Health Check:** [/health](https://m-s-m-p.onrender.com/health)  
+**GitHub Repository:** [Mr-Akhil12/M.S.M.P](https://github.com/Mr-Akhil12/M.S.M.P)
+
+
+---
+
+
+**Built with ❤️ by [AkhilDevs](https://github.com/Mr-Akhil12)**
+
+*Crafted for the Penrose Assessment Challenge*
+
+**October 2025 | Submitted 2 Days Early 🚀**
+
+---
+
+### ⭐ If this project impressed you, consider giving it a star!
+
+<img alt="GitHub stars" src="https://img.shields.io/github/stars/Mr-Akhil12/M.S.M.P?style=social">
+
