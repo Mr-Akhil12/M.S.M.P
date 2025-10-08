@@ -3,6 +3,7 @@ const axios = require('axios');
 /**
  * EasySendSMS Service
  * Sends OTP via SMS using EasySendSMS REST API v1
+ * Always logs OTP to terminal for convenience
  */
 class SMSService {
   constructor() {
@@ -13,16 +14,18 @@ class SMSService {
   }
 
   async sendOTP(msisdn, otp) {
-    // Test mode - OTP logged to terminal only
+    // ALWAYS log OTP to terminal (regardless of SMS_ENABLED)
+    console.log('\n========================================');
+    console.log('📱 OTP Generated');
+    console.log('========================================');
+    console.log(`Phone: ${msisdn}`);
+    console.log(`OTP Code: ${otp}`);
+    console.log(`Expires: 5 minutes`);
+    console.log(`SMS Mode: ${this.enabled ? '📤 Real SMS' : '🧪 Test Mode (No SMS)'}`);
+    console.log('========================================\n');
+
+    // Test mode - OTP logged only (no SMS sent)
     if (!this.enabled) {
-      console.log('\n========================================');
-      console.log('📱 SMS TEST MODE - OTP Generated');
-      console.log('========================================');
-      console.log(`Phone: ${msisdn}`);
-      console.log(`OTP Code: ${otp}`);
-      console.log(`Expires: 5 minutes`);
-      console.log('========================================\n');
-      
       return {
         success: true,
         messageId: 'test_mode_' + Date.now(),
@@ -30,7 +33,7 @@ class SMSService {
       };
     }
 
-    // Production mode - Real SMS via EasySendSMS
+    // Production mode - Real SMS via EasySendSMS (OTP already logged above)
     try {
       if (!this.apiKey) {
         throw new Error('SMS API key not configured');
@@ -46,6 +49,8 @@ class SMSService {
         type: "0"
       };
 
+      console.log(`[SMS] Sending to ${msisdn} via EasySendSMS...`);
+
       const response = await axios.post(this.baseUrl, payload, {
         headers: {
           'apikey': this.apiKey,
@@ -59,7 +64,7 @@ class SMSService {
         
         if (messageIdString.startsWith('OK:')) {
           const messageId = messageIdString.replace('OK: ', '').trim();
-          console.log(`[SMS] Sent to ${msisdn} (ID: ${messageId})`);
+          console.log(`[SMS] ✅ Sent successfully (ID: ${messageId})`);
           
           return {
             success: true,
@@ -70,6 +75,7 @@ class SMSService {
         
         if (messageIdString.startsWith('ERR:')) {
           const errorCode = messageIdString.match(/ERR:\s*(\d+)/)?.[1];
+          console.error(`[SMS] ❌ Failed with code ${errorCode}`);
           return {
             success: false,
             error: `SMS failed with code ${errorCode}`,
@@ -84,7 +90,7 @@ class SMSService {
       };
 
     } catch (error) {
-      console.error('[SMS] Error:', error.message);
+      console.error('[SMS] ❌ Error:', error.message);
       
       if (error.response?.data) {
         const errorData = error.response.data;
@@ -162,15 +168,16 @@ class SMSService {
       }));
 
       return {
-        success: response.data.status === 'OK',
-        results
+        success: true,
+        results,
+        provider: 'EasySendSMS'
       };
 
     } catch (error) {
-      console.error('[SMS] Bulk error:', error.message);
+      console.error('[SMS Bulk] Error:', error.message);
       return {
         success: false,
-        error: error.response?.data?.description || error.message
+        error: error.message
       };
     }
   }
@@ -181,7 +188,7 @@ class SMSService {
         healthy: true, 
         configured: true, 
         mode: 'test',
-        message: 'SMS test mode active - OTPs logged to terminal' 
+        message: 'SMS test mode active - OTPs logged to terminal (no SMS sent)' 
       };
     }
 
@@ -197,7 +204,8 @@ class SMSService {
       healthy: true,
       configured: true,
       mode: 'production',
-      provider: 'EasySendSMS'
+      provider: 'EasySendSMS',
+      message: 'Real SMS enabled - OTPs logged to terminal AND sent via SMS'
     };
   }
 }

@@ -16,12 +16,12 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1); // Trust first proxy (Render)
 }
 
-// CORS configuration
+// CORS configuration - Local-first setup
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5000',
-  process.env.CLIENT_URL,
-  'https://m-s-m-p.vercel.app'
+  'http://localhost:5173',      // ✅ Local frontend (primary)
+  'http://localhost:5000',      // ✅ Local backend (testing)
+  process.env.CLIENT_URL,       // ✅ Configured URL (.env)
+  'https://m-s-m-p.vercel.app'  // 🌐 Production (bonus)
 ].filter(Boolean);
 
 app.use(cors({
@@ -30,6 +30,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+console.log('[CORS] Allowed origins:', allowedOrigins);
 
 // Socket.IO configuration
 const io = new Server(server, {
