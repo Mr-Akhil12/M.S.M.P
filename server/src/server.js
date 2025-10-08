@@ -11,6 +11,11 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 const server = createServer(app);
 
+// Trust proxy - MUST be before other middleware
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // Trust first proxy (Render)
+}
+
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
@@ -122,6 +127,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`[ENV] Mode: ${process.env.NODE_ENV || 'development'}`);
   console.log(`[ENV] MongoDB: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
   console.log(`[ENV] Client URL: ${process.env.CLIENT_URL || 'Not set'}`);
+  console.log(`[ENV] Trust Proxy: ${app.get('trust proxy')}`);
   console.log(`[CORS] Allowed origins:`, allowedOrigins);
   console.log('========================================');
 });

@@ -23,6 +23,12 @@ const getStats = async (req, res) => {
       } }
     ]);
     
+    // Round revenue values to 2 decimal places
+    serviceBreakdown.forEach(service => {
+      service.revenue = parseFloat(service.revenue.toFixed(2));
+    });
+    
+    // Calculate total revenue with proper rounding
     const totalRevenue = parseFloat(
       serviceBreakdown.reduce((sum, s) => sum + s.revenue, 0).toFixed(2)
     );
@@ -34,6 +40,7 @@ const getStats = async (req, res) => {
       serviceBreakdown
     });
   } catch (error) {
+    console.error('[ADMIN] Stats error:', error);
     res.status(500).json({ message: 'Failed to fetch stats' });
   }
 };
@@ -85,13 +92,14 @@ const getUserStats = async (req, res) => {
       }
     ]);
     
-    // Round revenue to 2 decimal places
+    // Round revenue to 2 decimal places for each user
     userStats.forEach(user => {
       user.totalRevenue = parseFloat(user.totalRevenue.toFixed(2));
     });
     
     res.json(userStats);
   } catch (error) {
+    console.error('[ADMIN] User stats error:', error);
     res.status(500).json({ message: 'Failed to fetch user stats' });
   }
 };
@@ -108,12 +116,13 @@ const verifyAdminPassword = async (req, res) => {
     }
     
     if (password === process.env.ADMIN_PASSWORD) {
-      res.json({ success: true, message: 'Admin access granted' });
-    } else {
-      res.status(401).json({ message: 'Invalid admin password' });
+      return res.json({ valid: true });
     }
+    
+    res.status(401).json({ valid: false, message: 'Invalid password' });
   } catch (error) {
-    res.status(500).json({ message: 'Password verification failed' });
+    console.error('[ADMIN] Password verification error:', error);
+    res.status(500).json({ message: 'Verification failed' });
   }
 };
 
