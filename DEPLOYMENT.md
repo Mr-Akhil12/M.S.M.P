@@ -38,8 +38,14 @@ PORT=5000
 **Frontend (Vercel):**
 
 ```env
-VITE_API_URL=https://your-backend.onrender.com
+VITE_API_URL=https://msmp-api.onrender.com
 ```
+### 1.5: Ensure vercel.json Exists
+Make sure client/vercel.json exists with this content:
+
+
+```{  "rewrites": [    {      "source": "/(.*)",      "destination": "/index.html"    }  ]}```
+This fixes 404 errors on page refresh by ensuring all routes are handled by Vue Router.
 
 ### 2. Code Ready
 

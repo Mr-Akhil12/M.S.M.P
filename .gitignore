@@ -5,9 +5,9 @@ client/node_modules/
 package-lock.json
 
 # Environment variables
-.env
-.env.local
-.env.production
+# .env
+# .env.local
+# .env.production
 
 # Build outputs
 client/dist/
@@ -33,3 +33,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 .temp/
+
+# Build guide
+Assessment.md
+BuildGuide.md
