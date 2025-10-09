@@ -69,35 +69,39 @@ const io = new Server(server, {
   }
 });
 
-// Socket.IO authentication
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-  
-  if (!token) {
-    return next(new Error('Authentication error'));
-  }
-
-  try {
-    const decoded = tokenService.verifyToken(token);
-    socket.userId = decoded.userId;
-    next();
-  } catch (error) {
-    next(new Error('Authentication error'));
-  }
-});
-
-// Socket.IO connection
+// Socket.IO connection handler
 io.on('connection', (socket) => {
-  console.log(`[Socket.IO] User connected: ${socket.userId}`);
+  console.log('✅ [Socket.IO] Client connected:', socket.id);
+
+  // Extract token from auth handshake
+  const token = socket.handshake.auth?.token;
   
-  socket.join(socket.userId);
-  
+  if (token) {
+    try {
+      // Verify JWT and extract user ID
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.id;
+      
+      // Join user-specific room
+      socket.join(userId);
+      console.log(`✅ [Socket.IO] User ${userId} joined room`);
+      
+      // Store userId in socket for later use
+      socket.userId = userId;
+    } catch (error) {
+      console.error('❌ [Socket.IO] JWT verification failed:', error.message);
+    }
+  } else {
+    console.log('⚠️ [Socket.IO] No token provided in handshake');
+  }
+
   socket.on('disconnect', () => {
-    console.log(`[Socket.IO] User disconnected: ${socket.userId}`);
+    console.log('❌ [Socket.IO] Client disconnected:', socket.id);
   });
 });
 
-// Make io available to routes
+// Make io accessible to routes
 app.set('io', io);
 
 // Health check (BEFORE routes, no /api prefix)

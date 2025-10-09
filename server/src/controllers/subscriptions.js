@@ -70,19 +70,21 @@ const subscribe = async (req, res) => {
     
     // Emit real-time updates
     if (io) {
-      io.to(userId).emit('subscription:created', { 
-        userId, 
+      const userIdString = userId.toString(); 
+      
+      io.to(userIdString).emit('subscription:created', { 
+        userId: userIdString, 
         subscription,
         transaction 
       });
       
       // Emit separate transaction event
-      io.to(userId).emit('transaction:created', { 
-        userId,
+      io.to(userIdString).emit('transaction:created', { 
+        userId: userIdString,
         transaction
       });
       
-      console.log(`[Socket.IO] Emitted subscription:created and transaction:created for user ${userId}`);
+      console.log(`[Socket.IO] Emitted events to room: ${userIdString}`);
     }
     
     res.status(201).json({ 
@@ -130,19 +132,20 @@ const unsubscribe = async (req, res) => {
     
     // Emit real-time updates
     if (io) {
-      io.to(userId).emit('subscription:cancelled', { 
-        userId, 
+      const userIdString = userId.toString(); 
+      
+      io.to(userIdString).emit('subscription:cancelled', { 
+        userId: userIdString, 
         subscription,
         transaction 
       });
       
-      // Emit separate transaction event
-      io.to(userId).emit('transaction:created', { 
-        userId,
+      io.to(userIdString).emit('transaction:created', { 
+        userId: userIdString,
         transaction
       });
       
-      console.log(`[Socket.IO] Emitted subscription:cancelled and transaction:created for user ${userId}`);
+      console.log(`[Socket.IO] Emitted cancellation events to room: ${userIdString}`);
     }
     
     res.json({ message: 'Unsubscribed successfully', transaction });

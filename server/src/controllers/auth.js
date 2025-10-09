@@ -84,17 +84,15 @@ const sendOTP = async (req, res) => {
       // Continue even if SMS fails
     }
 
-    // Response
-    const response = {
-      message: 'OTP sent successfully',
-      ...(process.env.NODE_ENV === 'development' && { otp }) // Include OTP in dev mode
-    };
-
-    console.log('[AUTH] ✅ Response:', response);
     console.log('[AUTH] ===== END SEND OTP =====\n');
 
-    res.status(200).json(response);
+    // Return response with OTP - ALWAYS
+    const response = {
+      message: 'OTP sent successfully',
+      otp  
+    };
 
+    res.status(200).json(response);
   } catch (error) {
     console.error('\n[AUTH] ❌ SEND OTP ERROR:', error);
     console.error('[AUTH] Error stack:', error.stack);

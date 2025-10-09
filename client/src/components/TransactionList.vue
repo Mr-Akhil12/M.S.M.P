@@ -149,7 +149,7 @@ const setupSocketListeners = () => {
     fetchTransactions()
   })
 
-  // Also listen to subscription events as backup
+  // Listen to subscription events
   socket.value.on('subscription:created', (data) => {
     console.log('🔄 Subscription created - refreshing transactions')
     fetchTransactions()
@@ -170,11 +170,14 @@ const cleanupSocketListeners = () => {
   socket.value.off('subscription:cancelled')
 }
 
-// Watch for socket connection changes
-watch(socket, (newSocket) => {
-  if (newSocket) {
-    console.log('✅ Socket connected in TransactionList')
+// Watch for socket connection (only setup once when connected)
+watch(isConnected, (connected) => {
+  if (connected) {
+    console.log('✅ Socket connected - setting up listeners')
     setupSocketListeners()
+  } else {
+    console.log('❌ Socket disconnected - cleaning up listeners')
+    cleanupSocketListeners()
   }
 }, { immediate: true })
 
@@ -182,8 +185,8 @@ onMounted(() => {
   console.log('📊 TransactionList mounted')
   fetchTransactions()
   
-  // Setup listeners if socket already exists
-  if (socket.value) {
+  // Setup listeners if already connected
+  if (isConnected.value && socket.value) {
     setupSocketListeners()
   }
 })

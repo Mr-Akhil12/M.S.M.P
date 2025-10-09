@@ -1,54 +1,81 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { io } from 'socket.io-client'
 import { useAuthStore } from '../stores/auth'
 
-let socket = ref(null)
+// Singleton socket instance (shared across all components)
+let socketInstance = null
 let isConnected = ref(false)
 
 export function useSocket() {
   const authStore = useAuthStore()
 
-  onMounted(() => {
+  // Return existing socket if already connected
+  if (socketInstance && socketInstance.connected) {
+    console.log('🔌 [Socket] Reusing existing connection')
+    return {
+      socket: ref(socketInstance),
+      isConnected
+    }
+  }
+
+  // Create new socket connection
+  if (!socketInstance) {
     // Determine Socket.IO URL based on environment
     const socketUrl = import.meta.env.PROD 
       ? 'https://m-s-m-p.onrender.com'  // Production
       : 'http://localhost:5000'         // Local/Docker
 
-    console.log('🔌 [Socket] Connecting to:', socketUrl)
+    console.log('🔌 [Socket] Creating new connection to:', socketUrl)
 
-    socket.value = io(socketUrl, {
+    socketInstance = io(socketUrl, {
       transports: ['websocket', 'polling'],
       withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
       auth: {
         token: authStore.token
       }
     })
 
-    socket.value.on('connect', () => {
-      console.log('✅ [Socket] Connected:', socket.value.id)
+    socketInstance.on('connect', () => {
+      console.log('✅ [Socket] Connected:', socketInstance.id)
       isConnected.value = true
     })
 
-    socket.value.on('disconnect', () => {
-      console.log('❌ [Socket] Disconnected')
+    socketInstance.on('disconnect', (reason) => {
+      console.log('❌ [Socket] Disconnected:', reason)
       isConnected.value = false
     })
 
-    socket.value.on('connect_error', (error) => {
-      console.error('❌ [Socket] Connection error:', error)
+    socketInstance.on('connect_error', (error) => {
+      console.error('❌ [Socket] Connection error:', error.message)
       isConnected.value = false
     })
-  })
 
-  onUnmounted(() => {
-    if (socket.value) {
-      console.log('🔌 [Socket] Disconnecting...')
-      socket.value.disconnect()
-    }
-  })
+    socketInstance.on('reconnect', (attemptNumber) => {
+      console.log('🔄 [Socket] Reconnected after', attemptNumber, 'attempts')
+      isConnected.value = true
+    })
+
+    // Listen for all events (debugging)
+    socketInstance.onAny((eventName, ...args) => {
+      console.log(`📡 [Socket] Event received: ${eventName}`, args)
+    })
+  }
 
   return {
-    socket,
+    socket: ref(socketInstance),
     isConnected
+  }
+}
+
+// Cleanup function (call on logout)
+export function disconnectSocket() {
+  if (socketInstance) {
+    console.log('🔌 [Socket] Disconnecting...')
+    socketInstance.disconnect()
+    socketInstance = null
+    isConnected.value = false
   }
 }
