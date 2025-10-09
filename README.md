@@ -42,6 +42,9 @@
 
 **👉 [Launch Application](https://m-s-m-p.vercel.app) 👈**
 
+**The render backend is a bit slow on initial response (Free Tier)**
+**Request otp 1/2 times, wait a minute and then request again**
+
 **My Render Logins: (Use to view logs from my vercel app)**
 
 - Email: pillayakhil2@gmail.com
