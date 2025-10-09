@@ -52,10 +52,16 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppToast } from '../composables/useToast'
 import api from '../services/api'
+
+// Debug: Log API base URL on mount
+onMounted(() => {
+  console.log('🔍 [Landing] API Base URL:', api.defaults.baseURL);
+  console.log('🔍 [Landing] VITE_API_URL:', import.meta.env.VITE_API_URL);
+});
 
 const router = useRouter()
 const { showSuccess, showError } = useAppToast()
@@ -77,12 +83,25 @@ const sendOTP = async () => {
   loading.value = true
   
   try {
-    await api.post('/auth/send-otp', { msisdn: msisdn.value })
+    console.log('🔵 [Landing] Sending OTP to:', msisdn.value);
+    
+    const response = await api.post('/auth/send-otp', { msisdn: msisdn.value })
+    
+    console.log('✅ [Landing] OTP Response:', response.data);
+    
     localStorage.setItem('tempMsisdn', msisdn.value)
-    showSuccess('OTP sent successfully! Check your phone/terminal.')
+    showSuccess('OTP sent successfully!')
     router.push('/verify-otp')
   } catch (err) {
-    error.value = err.response?.data?.message || 'Failed to send OTP. Please try again.'
+    console.error('❌ [Landing] OTP Error:', err);
+    
+    if (err.response?.status === 429) {
+      error.value = 'Too many requests. Please try again in 15 minutes.'
+    } else if (err.code === 'ERR_NETWORK') {
+      error.value = 'Cannot connect to server. Please check if backend is running.'
+    } else {
+      error.value = err.response?.data?.message || 'Failed to send OTP. Please try again.'
+    }
     showError(error.value)
   } finally {
     loading.value = false

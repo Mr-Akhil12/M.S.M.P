@@ -11,105 +11,109 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 const server = createServer(app);
 
-// Trust proxy - MUST be before other middleware
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1); // Trust first proxy (Render)
-}
+// Trust proxy - Set to 1 for local dev with Docker, or when behind reverse proxy
+app.set('trust proxy', 1);
 
-// CORS configuration - Local-first setup
+// CORS configuration
 const allowedOrigins = [
-  'http://localhost:5173',      // ✅ Local frontend (primary)
-  'http://localhost:5000',      // ✅ Local backend (testing)
-  process.env.CLIENT_URL,       // ✅ Configured URL (.env)
-  'https://m-s-m-p.vercel.app'  // 🌐 Production (bonus)
+  'http://localhost:5173',
+  'http://localhost:5000',
+  process.env.CLIENT_URL,
+  'https://m-s-m-p.vercel.app'
 ].filter(Boolean);
 
+console.log('[CORS] Allowed origins:', allowedOrigins);
+
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('[CORS] ❌ Blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-console.log('[CORS] Allowed origins:', allowedOrigins);
-
-// Socket.IO configuration
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ['GET', 'POST']
-  }
-});
-
-// Security headers
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 
-// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging (development)
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    next();
-  });
-}
+// Global request logger
+app.use((req, res, next) => {
+  console.log('\n🌐 INCOMING REQUEST');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Origin:', req.headers.origin);
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Body:', req.body);
+  console.log('---');
+  next();
+});
 
-// Connect to MongoDB
-connectDB();
+// Socket.IO setup
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true
+  }
+});
 
 // Socket.IO authentication
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
-  if (!token) return next(new Error('Authentication error'));
+  
+  if (!token) {
+    return next(new Error('Authentication error'));
+  }
 
   try {
     const decoded = tokenService.verifyToken(token);
-    socket.userId = decoded.id;
+    socket.userId = decoded.userId;
     next();
-  } catch (err) {
-    next(new Error('Invalid token'));
+  } catch (error) {
+    next(new Error('Authentication error'));
   }
 });
 
-// Socket.IO connection handling
+// Socket.IO connection
 io.on('connection', (socket) => {
-  console.log('[Socket.IO] User connected:', socket.userId);
+  console.log(`[Socket.IO] User connected: ${socket.userId}`);
   
-  // Join user-specific room
   socket.join(socket.userId);
-  console.log(`[Socket.IO] User ${socket.userId} joined room ${socket.userId}`);
-
+  
   socket.on('disconnect', () => {
-    console.log('[Socket.IO] User disconnected:', socket.userId);
+    console.log(`[Socket.IO] User disconnected: ${socket.userId}`);
   });
 });
 
-// Make io accessible to routes
+// Make io available to routes
 app.set('io', io);
 
-// Initialize subscription controller with Socket.IO
-const subscriptionController = require('./controllers/subscriptions');
-subscriptionController.initializeSocket(io);
-
-// API Routes (with /api prefix)
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/subscriptions', require('./routes/subscriptions'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/admin', require('./routes/admin'));
 
-// Health check (no prefix)
+// Health check
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    allowedOrigins: allowedOrigins
+    allowedOrigins: allowedOrigins,
+    trustProxy: app.get('trust proxy')
   });
 });
 
@@ -123,15 +127,29 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log('========================================');
-  console.log(`[Server] Running on http://0.0.0.0:${PORT}`);
-  console.log(`[ENV] Mode: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`[ENV] MongoDB: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
-  console.log(`[ENV] Client URL: ${process.env.CLIENT_URL || 'Not set'}`);
-  console.log(`[ENV] Trust Proxy: ${app.get('trust proxy')}`);
-  console.log(`[CORS] Allowed origins:`, allowedOrigins);
-  console.log('========================================');
-});
+// Start server AFTER database connects
+const startServer = async () => {
+  try {
+    // Connect to database first
+    await connectDB();
+    
+    // Then start server
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log('========================================');
+      console.log(`[Server] Running on http://0.0.0.0:${PORT}`);
+      console.log(`[ENV] Mode: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`[ENV] Client URL: ${process.env.CLIENT_URL}`);
+      console.log(`[ENV] Trust Proxy: ${app.get('trust proxy')}`);
+      console.log('[CORS] Allowed origins:', allowedOrigins);
+      console.log('========================================');
+    });
+  } catch (error) {
+    console.error('[Server] Failed to start:', error.message);
+    process.exit(1);
+  }
+};
+
+// Start the server
+startServer();
 
 module.exports = { app, io };

@@ -9,15 +9,24 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true,
-    index: true
+    trim: true
   },
-  lastLogin: {
+  otp: {
+    type: String,
+    trim: true
+  },
+  otpExpiry: {
+    type: Number, 
+    default: null
+  },
+  otpAttempts: {
+    type: Number,
+    default: 0
+  },
+  createdAt: {
     type: Date,
     default: Date.now
   }
-}, {
-  timestamps: true
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,4 +1,7 @@
-# Use Node.js 20 Alpine (compatible with Vite 7.x)
+# ========================================
+# Backend Docker Image (Node.js 20 Alpine)
+# ========================================
+
 FROM node:20-alpine
 
 # Set working directory
@@ -7,18 +10,18 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (dev + prod for nodemon)
+RUN npm ci
 
-# Copy application code
+# Copy application source
 COPY . .
 
-# Expose port
+# Expose backend port
 EXPOSE 5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-    CMD node -e "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:5000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
-# Start application
-CMD ["npm", "start"]
+# Start with nodemon for hot reload
+CMD ["npm", "run", "dev"]

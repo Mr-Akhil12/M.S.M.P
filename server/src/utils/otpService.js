@@ -1,32 +1,15 @@
 const crypto = require('crypto');
-const smsService = require('../services/smsService');
 
 // In-memory OTP storage (use Redis in production for scalability)
 const otpStore = new Map();
 
 /**
- * Generate and send OTP via SMS
- * @param {string} msisdn - User's mobile number (format: 27XXXXXXXXX)
- * @returns {string} Generated 6-digit OTP (for development/testing)
+ * Generate 6-digit OTP
+ * @returns {string} Generated 6-digit OTP
  */
-const generateOTP = async (msisdn) => {
+const generateOTP = () => {
+  // Simple synchronous OTP generation
   const otp = crypto.randomInt(100000, 999999).toString();
-  const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
-  
-  // Store OTP with expiry and attempt counter
-  otpStore.set(msisdn, { otp, expiry, attempts: 0 });
-  
-  // Send SMS (will be logged to terminal in test mode)
-  try {
-    const smsResult = await smsService.sendOTP(msisdn, otp);
-    
-    if (!smsResult.success && !smsResult.mock) {
-      console.error(`[OTP] SMS failed for ${msisdn}:`, smsResult.error);
-    }
-  } catch (error) {
-    console.error('[OTP] SMS error:', error.message);
-  }
-  
   return otp;
 };
 

@@ -1,4 +1,8 @@
-# Build stage - Use Node.js 20 for Vite 7.x compatibility
+# ========================================
+# Frontend Docker Image (Multi-stage Build)
+# ========================================
+
+# Stage 1: Build Vue.js app
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -12,19 +16,19 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build for production
+# Build production bundle
 RUN npm run build
 
-# Production stage
+# Stage 2: Serve with Nginx
 FROM nginx:alpine
 
-# Copy custom nginx config
+# Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port
+# Expose HTTP port
 EXPOSE 80
 
 # Start nginx

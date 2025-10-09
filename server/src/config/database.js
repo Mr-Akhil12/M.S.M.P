@@ -5,10 +5,20 @@ const mongoose = require('mongoose');
  */
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    const uri = process.env.MONGODB_URI;
     
-    console.log(`[DB] Connected: ${conn.connection.host}`);
-    console.log(`[DB] Database: ${conn.connection.name}`);
+    // DEBUG: Show connection string (hide password)
+    console.log('[DEBUG] Full URI:', uri);
+    console.log('[DEBUG] Masked URI:', uri?.replace(/:[^:@]+@/, ':****@'));
+    
+ 
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000,
+    
+    });
+    
+    console.log('[DB] Connected:', conn.connection.host);
+    console.log('[DB] Database:', conn.connection.name);
     
     // Monitor connection health
     mongoose.connection.on('error', (err) => {
@@ -24,8 +34,10 @@ const connectDB = async () => {
     });
     
   } catch (error) {
-    console.error('[DB] Failed to connect:', error.message);
-    process.exit(1);
+    console.error('[DB] Connection error:', error.message);
+    console.error('[DB] Error code:', error.code);
+    console.error('[DB] Error name:', error.name);
+    throw error;
   }
 };
 
