@@ -88,7 +88,7 @@ SMS_ENABLED=true
 NODE_ENV=development
 ```
 
-Create client/.env:
+Configure client/.env:
 ```env
 VITE_API_URL=http://localhost:5000
 ```
