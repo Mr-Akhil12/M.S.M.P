@@ -49,7 +49,6 @@
 ### Prerequisites
 
 - Node.js 18+ ([Download](https://nodejs.org/))
-- MongoDB Atlas account ([Free signup](https://www.mongodb.com/cloud/atlas/register))
 - Git ([Download](https://git-scm.com/))
 
 ---
@@ -73,21 +72,23 @@ npm install
 
 **2. Configure Environment Variables**
 
-Create .env:
+Configure server/.env:
 ```env
-MONGODB_URI=mongodb+srv://your-connection-string
-JWT_SECRET=your-64-char-secret-key
+MONGODB_URI=mongodb+srv://pillayakhil2:AkhilPillay21!@cluster0.hjxnabk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=0e935731a2da39d0f0ee61cd4e87acbedcaf95521e34c731ed8142c2c94157f7dde53a03ec0d03d0083be2f0575a5260927804df4756dbed28e1f9761cb5a4b5
 PORT=5000
 CLIENT_URL=http://localhost:5173
+# Production URL (secondary - uncomment if testing deployed version)
+# CLIENT_URL=https://m-s-m-p.vercel.app
 TELCO_PROVIDER=Vodacom
 ADMIN_PASSWORD=Password123!
-EASYSENDSMS_API_KEY=your-key
-EASYSENDSMS_SENDER_ID=YourBrand
-SMS_ENABLED=false
+EASYSENDSMS_API_KEY=ro4vfk8lhyl482hc7d2713mhjno4bkml
+EASYSENDSMS_SENDER_ID=27678659396
+SMS_ENABLED=true
 NODE_ENV=development
 ```
 
-Create .env:
+Create client/.env:
 ```env
 VITE_API_URL=http://localhost:5000
 ```
