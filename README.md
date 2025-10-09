@@ -42,6 +42,11 @@
 
 **👉 [Launch Application](https://m-s-m-p.vercel.app) 👈**
 
+**My Render Logins: (Use to view logs from my vercel app)**
+
+-  Email: pillayakhil2@gmail.com
+-  Password: y#aFX76DiDfLcuF
+
 **Test Credentials:**
 
 - 📱 MSISDN: Any valid SA number (27XXXXXXXXX)
