@@ -1,5 +1,6 @@
-const User = require('../models/User');
-const Subscription = require('../models/Subscription');
+const User = require('../models/user'); 
+const Subscription = require('../models/subscription');
+const Transaction = require('../models/transaction');
 const Service = require('../models/service');
 
 /**

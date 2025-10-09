@@ -1,5 +1,5 @@
-const Subscription = require('../models/Subscription');
-const Transaction = require('../models/Transaction');
+const Subscription = require('../models/subscription');
+const Transaction = require('../models/transaction');
 const Service = require('../models/service');
 const { createTelcoProvider, getProviderFromMSISDN } = require('../config/telco.config');
 
