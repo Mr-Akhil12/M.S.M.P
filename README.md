@@ -6,10 +6,11 @@
 [![Backend API](https://img.shields.io/badge/📡_Backend-Render-blue?style=for-the-badge)](https://m-s-m-p.onrender.com/health)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?style=flat&logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8.0-47A248?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.7-010101?style=flat&logo=socket.io&logoColor=white)](https://socket.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
 ---
 
@@ -18,15 +19,19 @@
 <div align="center">
 
 ### Landing Page (Light Mode)
+
 ![Landing Light](https://static.wixstatic.com/media/631845_a0eda6f146ab48e2b978becf5f03b1e7~mv2.png)
 
 ### Dashboard (Dark Mode)
+
 ![Dashboard Dark](https://static.wixstatic.com/media/631845_587ffad1dbbe48019fa6d125ad6a71dd~mv2.png)
 
 ### Admin Analytics
+
 ![Admin Dashboard](https://static.wixstatic.com/media/631845_8bede74aabde455d9688e0815e3cf4eb~mv2.png)
 
 ### Mobile Responsive
+
 <img src="https://static.wixstatic.com/media/631845_8bc43916678942849cc9528cb636b702~mv2.png" alt="Mobile" width="250"/>
 
 </div>
@@ -38,6 +43,7 @@
 **👉 [Launch Application](https://m-s-m-p.vercel.app) 👈**
 
 **Test Credentials:**
+
 - 📱 MSISDN: Any valid SA number (27XXXXXXXXX)
 - 🔑 OTP: Check [backend logs](https://dashboard.render.com/) (test mode)
 - 🔐 Admin: `Password123!`
@@ -48,7 +54,8 @@
 
 ### Prerequisites
 
-- Node.js 18+ ([Download](https://nodejs.org/))
+- **Option 1 (Local):** Node.js 20+ ([Download](https://nodejs.org/))
+- **Option 2 (Docker):** Docker Desktop ([Download](https://www.docker.com/products/docker-desktop/))
 - Git ([Download](https://git-scm.com/))
 
 ---
@@ -72,9 +79,10 @@ npm install
 
 **2. Configure Environment Variables**
 
-Configure server/.env:
+Configure `server/.env`:
+
 ```env
-MONGODB_URI=mongodb+srv://pillayakhil2:AkhilPillay21!@cluster0.hjxnabk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=mongodb+srv://pillayakhil2:u5HrJ$ge2ZAziEW@cluster0.hjxnabk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=0e935731a2da39d0f0ee61cd4e87acbedcaf95521e34c731ed8142c2c94157f7dde53a03ec0d03d0083be2f0575a5260927804df4756dbed28e1f9761cb5a4b5
 PORT=5000
 CLIENT_URL=http://localhost:5173
@@ -88,7 +96,8 @@ SMS_ENABLED=true
 NODE_ENV=development
 ```
 
-Configure client/.env:
+Configure `client/.env`:
+
 ```env
 VITE_API_URL=http://localhost:5000
 ```
@@ -113,81 +122,160 @@ npm run dev
 
 ---
 
-### Option 2: Docker Setup (Coming Soon)
+### Option 2: Docker Setup (Recommended)
 
 **Prerequisites:**
-- Docker Desktop installed
-- Docker Compose installed
 
-**Quick Start:**
+- ✅ Docker Desktop installed and running
+- ✅ Docker Compose installed (included with Docker Desktop)
+
+**1. Clone Repository**
 
 ```bash
-# Clone repository
 git clone https://github.com/Mr-Akhil12/M.S.M.P.git
 cd M.S.M.P
-
-# Create .env files (same as Option 1)
-
-# Build and run
-docker-compose up --build
-
-# Access
-# Frontend: http://localhost:5173
-# Backend: http://localhost:5000
 ```
 
-**Docker Configuration:**
+**2. Create Environment File**
 
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  backend:
-    build: ./server
-    ports:
-      - "5000:5000"
-    env_file:
-      - ./server/.env
-    depends_on:
-      - mongodb
-  
-  frontend:
-    build: ./client
-    ports:
-      - "5173:5173"
-    env_file:
-      - ./client/.env
-  
-  mongodb:
-    image: mongo:8.0
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
+Configure `.env` in project root:
 
-volumes:
-  mongo-data:
+```env
+# Database (MongoDB Atlas)
+MONGODB_URI=mongodb+srv://pillayakhil2:u5HrJ$ge2ZAziEW@cluster0.hjxnabk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+# JWT Secret
+JWT_SECRET=0e935731a2da39d0f0ee61cd4e87acbedcaf95521e34c731ed8142c2c94157f7dde53a03ec0d03d0083be2f0575a5260927804df4756dbed28e1f9761cb5a4b5
+
+# Telco Provider
+TELCO_PROVIDER=Vodacom
+
+# Admin Access
+ADMIN_PASSWORD=Password123!
+
+# SMS Configuration
+EASYSENDSMS_API_KEY=ro4vfk8lhyl482hc7d2713mhjno4bkml
+EASYSENDSMS_SENDER_ID=27678659396
+SMS_ENABLED=true
 ```
 
-**Note:** Full Docker setup coming in v1.1. Current focus is local development workflow.
+**3. Build Docker Images**
+
+```bash
+# Build images (first time: ~3-5 minutes)
+docker-compose build
+
+# Expected output:
+# [+] Building 180.3s (24/24) FINISHED
+#  => [backend] ...
+#  => [frontend] ...
+```
+
+**4. Start Containers**
+
+```bash
+# Start in attached mode (see logs)
+docker-compose up
+
+# OR start in detached mode (background)
+docker-compose up -d
+```
+
+**Expected Output:**
+
+```
+[+] Running 2/2
+ ✔ Container msmp-backend   Started
+ ✔ Container msmp-frontend  Started
+
+msmp-backend  | ========================================
+msmp-backend  | [Server] Running on http://0.0.0.0:5000
+msmp-backend  | [ENV] Mode: development
+msmp-backend  | [ENV] MongoDB: Connected ✓
+msmp-backend  | ========================================
+```
+
+**5. Access Application**
+
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:5000
+- **Health Check:** http://localhost:5000/health
+
+**6. View Logs**
+
+```bash
+# All services
+docker-compose logs -f
+
+# Backend only
+docker-compose logs -f backend
+
+# Frontend only
+docker-compose logs -f frontend
+```
+
+**7. Stop Containers**
+
+```bash
+# Stop containers (preserves data)
+docker-compose down
+
+# Stop and remove volumes (clean slate)
+docker-compose down -v
+```
+
+---
+
+### Docker Commands Reference
+
+| Command                           | Purpose                         |
+| --------------------------------- | ------------------------------- |
+| `docker-compose up`               | Start all containers (attached) |
+| `docker-compose up -d`            | Start in background (detached)  |
+| `docker-compose down`             | Stop all containers             |
+| `docker-compose logs -f`          | Follow logs (all services)      |
+| `docker-compose logs -f backend`  | Follow backend logs only        |
+| `docker-compose logs -f frontend` | Follow frontend logs only       |
+| `docker-compose restart backend`  | Restart backend container       |
+| `docker-compose up --build`       | Rebuild and start               |
+| `docker ps`                       | List running containers         |
+| `docker stats`                    | View resource usage             |
+| `docker-compose exec backend sh`  | Shell into backend container    |
+
+---
+
+### Docker Hot Reload (Development)
+
+The Docker setup includes hot reload for backend development:
+
+- ✅ **Backend:** Edit files in `server/src/` → auto-restart
+- ✅ **Frontend:** Nginx serves pre-built static files (rebuild for changes)
+
+**To apply frontend changes:**
+
+```bash
+docker-compose up --build frontend
+```
 
 ---
 
 ### Option 3: Production Deployment
 
 **Backend (Render):**
+
 1. Push to GitHub
 2. Create [Render](https://render.com/) account
 3. New Web Service → Connect repo
-4. Root directory: server
+4. Root directory: `server`
 5. Build: `npm install`
 6. Start: `npm start`
 7. Add environment variables (same as local)
 
 **Frontend (Vercel):**
+
 1. Create [Vercel](https://vercel.com/) account
 2. Import GitHub repo
-3. Root directory: client
+3. Root directory: `client`
 4. Build: `npm run build`
 5. Add `VITE_API_URL=https://your-backend.onrender.com`
 
@@ -197,23 +285,25 @@ volumes:
 
 ### Frontend Architecture
 
-| Technology | Version | Justification |
-|------------|---------|---------------|
-| **Vue.js 3** | 3.5+ | Company stack requirement. Composition API for better code organization. |
-| **Vite** | 5.x | Lightning-fast HMR (200ms vs Webpack's 2s). Modern ESM-based tooling. |
-| **Pinia** | 2.x | Official Vue state management. TypeScript-friendly, DevTools support. |
-| **Vue Router** | 4.x | Client-side routing. Guards for auth protection. |
-| **TailwindCSS** | 3.x | Utility-first CSS. Rapid prototyping. Built-in dark mode. |
-| **Socket.IO Client** | 4.7 | Real-time subscriptions. Auto-reconnection. Cross-browser support. |
-| **Axios** | 1.x | Promise-based HTTP. Interceptors for JWT injection. Better error handling than fetch. |
+| Technology           | Version | Justification                                                                         |
+| -------------------- | ------- | ------------------------------------------------------------------------------------- |
+| **Vue.js 3**         | 3.5+    | Company stack requirement. Composition API for better code organization.              |
+| **Vite**             | 5.x     | Lightning-fast HMR (200ms vs Webpack's 2s). Modern ESM-based tooling.                 |
+| **Pinia**            | 2.x     | Official Vue state management. TypeScript-friendly, DevTools support.                 |
+| **Vue Router**       | 4.x     | Client-side routing. Guards for auth protection.                                      |
+| **TailwindCSS**      | 3.x     | Utility-first CSS. Rapid prototyping. Built-in dark mode.                             |
+| **Socket.IO Client** | 4.7     | Real-time subscriptions. Auto-reconnection. Cross-browser support.                    |
+| **Axios**            | 1.x     | Promise-based HTTP. Interceptors for JWT injection. Better error handling than fetch. |
 
 **Why Vue 3 over React?**
+
 - Company stack alignment
 - Smaller bundle size (13KB vs React's 42KB)
 - Better performance (Virtual DOM optimizations)
 - Simpler learning curve
 
 **Why Pinia over Vuex?**
+
 - Official recommendation from Vue team
 - TypeScript support out of the box
 - Modular stores (no mutations boilerplate)
@@ -223,34 +313,62 @@ volumes:
 
 ### Backend Architecture
 
-| Technology | Version | Justification |
-|------------|---------|---------------|
-| **Node.js + Express** | 18+ / 4.x | Non-blocking I/O perfect for real-time apps. Minimal overhead. |
-| **MongoDB Atlas** | 8.0 | Cloud-native. Flexible schema for evolving subscription models. |
-| **Mongoose** | 8.x | Schema validation. Middleware hooks. Query builders. |
-| **Socket.IO** | 4.7 | Bi-directional communication. Room-based architecture for user isolation. |
-| **JWT** | 9.x | Stateless authentication. No server-side session storage. |
-| **express-rate-limit** | 7.x | DDoS protection. Prevents OTP abuse (3 requests/15min). |
-| **Helmet** | 7.x | Security headers (XSS, clickjacking, MIME sniffing). |
-| **bcrypt** | 5.x | Secure password hashing (admin authentication). |
+| Technology             | Version   | Justification                                                             |
+| ---------------------- | --------- | ------------------------------------------------------------------------- |
+| **Node.js + Express**  | 20+ / 4.x | Non-blocking I/O perfect for real-time apps. Minimal overhead.            |
+| **MongoDB Atlas**      | 8.0       | Cloud-native. Flexible schema for evolving subscription models.           |
+| **Mongoose**           | 8.x       | Schema validation. Middleware hooks. Query builders.                      |
+| **Socket.IO**          | 4.7       | Bi-directional communication. Room-based architecture for user isolation. |
+| **JWT**                | 9.x       | Stateless authentication. No server-side session storage.                 |
+| **express-rate-limit** | 7.x       | DDoS protection. Prevents OTP abuse (3 requests/15min).                   |
+| **Helmet**             | 7.x       | Security headers (XSS, clickjacking, MIME sniffing).                      |
+| **bcrypt**             | 5.x       | Secure password hashing (admin authentication).                           |
 
 **Why MongoDB over SQL?**
+
 - Flexible schema (subscriptions/services evolve frequently)
 - JSON-native (seamless Node.js integration)
 - Horizontal scaling with sharding
 - Rich aggregation framework (admin analytics)
 
 **Why Socket.IO over WebSockets?**
+
 - Auto-reconnection logic
 - HTTP long-polling fallback (firewall-friendly)
 - Room/namespace support (user isolation)
 - Cross-browser compatibility
 
 **Why JWT over Sessions?**
+
 - Stateless (no server-side storage)
 - Scalable (no session replication needed)
 - Mobile-friendly (token in Authorization header)
 - Microservices-ready (tokens work across services)
+
+---
+
+### Docker Architecture
+
+| Component          | Technology     | Size   | Purpose                                 |
+| ------------------ | -------------- | ------ | --------------------------------------- |
+| **Backend Image**  | Node 20 Alpine | ~120MB | Lightweight Node.js runtime             |
+| **Frontend Image** | Nginx Alpine   | ~25MB  | Static file serving (multi-stage build) |
+| **Network**        | Bridge Driver  | -      | Container communication                 |
+| **Volumes**        | Named volumes  | -      | Persist node_modules                    |
+
+**Why Docker?**
+
+- ✅ Consistent environment across dev/staging/prod
+- ✅ Eliminate "works on my machine" issues
+- ✅ Easy onboarding for new developers
+- ✅ Isolated dependencies (no global npm installs)
+- ✅ Production-ready containerization
+
+**Why Multi-Stage Frontend Build?**
+
+- ✅ Builder stage: Compiles Vue app (includes node_modules)
+- ✅ Production stage: Only serves static files (no Node.js)
+- ✅ Final image: 25MB vs 200MB (88% smaller)
 
 ---
 
@@ -260,21 +378,23 @@ volumes:
 
 ```javascript
 // Each user joins their own room
-socket.on('connect', () => {
-  const userId = decodeJWT(socket.handshake.auth.token)
-  socket.join(userId)
-})
+socket.on("connect", () => {
+  const userId = decodeJWT(socket.handshake.auth.token);
+  socket.join(userId);
+});
 
 // Emit to specific user only
-io.to(userId).emit('subscription:created', data)
+io.to(userId).emit("subscription:created", data);
 ```
 
 **Why Rooms?**
+
 - ✅ Privacy: User A can't see User B's events
 - ✅ Security: JWT validation on connection
 - ✅ Scalability: Easy to add broadcast/admin rooms
 
 **Events Emitted:**
+
 - `subscription:created` → New subscription added
 - `subscription:cancelled` → Subscription removed
 - `transaction:created` → New transaction recorded
@@ -296,12 +416,14 @@ SMS_ENABLED=true
 ```
 
 **Why EasySendSMS?**
+
 - South African provider (local delivery)
 - REST API v1 (simple integration)
 - Bulk SMS support (30 recipients/request)
 - Affordable (R0.25/SMS)
 
 **Alternative Considered:**
+
 - ❌ Twilio: Too expensive for SA market
 - ❌ Africastalking: Complex API, overkill for OTP
 
@@ -328,6 +450,7 @@ const provider = TelcoFactory.create(process.env.TELCO_PROVIDER)
 ```
 
 **Why This Approach?**
+
 - ✅ Easy to add new providers (extend base class)
 - ✅ Mock for testing (TestProvider class)
 - ✅ Swap providers via env var (no code changes)
@@ -337,15 +460,15 @@ const provider = TelcoFactory.create(process.env.TELCO_PROVIDER)
 
 ### Security Layers
 
-| Layer | Implementation | Purpose |
-|-------|----------------|---------|
-| **CORS** | Whitelist origins | Prevent unauthorized domains |
-| **Helmet** | 15 security headers | XSS, clickjacking, MIME sniffing |
-| **Rate Limiting** | 3 OTP/15min | Prevent brute-force attacks |
-| **JWT Expiry** | 24 hours | Force re-authentication |
-| **OTP Expiry** | 5 minutes | Minimize attack window |
-| **Input Validation** | Server-side checks | Sanitize MSISDN, serviceId |
-| **Attempt Limiting** | 3 tries per OTP | Lock after failed verifications |
+| Layer                | Implementation      | Purpose                          |
+| -------------------- | ------------------- | -------------------------------- |
+| **CORS**             | Whitelist origins   | Prevent unauthorized domains     |
+| **Helmet**           | 15 security headers | XSS, clickjacking, MIME sniffing |
+| **Rate Limiting**    | 3 OTP/15min         | Prevent brute-force attacks      |
+| **JWT Expiry**       | 24 hours            | Force re-authentication          |
+| **OTP Expiry**       | 5 minutes           | Minimize attack window           |
+| **Input Validation** | Server-side checks  | Sanitize MSISDN, serviceId       |
+| **Attempt Limiting** | 3 tries per OTP     | Lock after failed verifications  |
 
 ---
 
@@ -374,10 +497,11 @@ Content-Type: application/json
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "OTP sent successfully",
-  "otp": "123456"  // Only in development mode
+  "otp": "123456" // Only in development mode
 }
 ```
 
@@ -398,6 +522,7 @@ Content-Type: application/json
 ```
 
 **Response (200):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -423,6 +548,7 @@ Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -462,6 +588,7 @@ Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -494,6 +621,7 @@ Content-Type: application/json
 ```
 
 **Response (201):**
+
 ```json
 {
   "message": "Subscription created successfully",
@@ -524,6 +652,7 @@ Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Unsubscribed successfully",
@@ -550,6 +679,7 @@ Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -584,6 +714,7 @@ Content-Type: application/json
 ```
 
 **Response (200):**
+
 ```json
 {
   "valid": true,
@@ -600,6 +731,7 @@ GET /api/admin/stats
 ```
 
 **Response (200):**
+
 ```json
 {
   "totalUsers": 42,
@@ -625,6 +757,7 @@ GET /api/admin/user-stats
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -650,6 +783,7 @@ All errors follow this format:
 ```
 
 **Common Error Codes:**
+
 - `INVALID_MSISDN` (400) - Invalid phone number
 - `OTP_EXPIRED` (400) - OTP expired (5 min)
 - `OTP_INVALID` (400) - Wrong OTP code
@@ -662,11 +796,11 @@ All errors follow this format:
 
 ### Rate Limits
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `/auth/send-otp` | 3 requests | 15 minutes |
-| `/auth/verify-otp` | 10 requests | 15 minutes |
-| All others | 100 requests | 15 minutes |
+| Endpoint           | Limit        | Window     |
+| ------------------ | ------------ | ---------- |
+| `/auth/send-otp`   | 3 requests   | 15 minutes |
+| `/auth/verify-otp` | 10 requests  | 15 minutes |
+| All others         | 100 requests | 15 minutes |
 
 ---
 
@@ -697,6 +831,8 @@ M.S.M.P/
 │   │   ├── services/api.js          # Axios instance
 │   │   └── App.vue                  # Root component
 │   ├── .env                         # Frontend env vars
+│   ├── Dockerfile                   # Frontend Docker config
+│   ├── nginx.conf                   # Nginx configuration
 │   ├── tailwind.config.js           # TailwindCSS config
 │   └── vite.config.js               # Vite config
 │
@@ -731,9 +867,12 @@ M.S.M.P/
 │   │   │   └── telco.config.js      # Telco configs
 │   │   └── server.js                # Express entry
 │   ├── .env                         # Backend env vars
+│   ├── Dockerfile                   # Backend Docker config
 │   └── package.json                 # Dependencies
 │
+├── .env                              # Docker Compose env vars
 ├── .gitignore                        # Git ignore
+├── docker-compose.yml                # Docker orchestration
 ├── README.md                         # This file
 └── LICENSE                           # MIT License
 ```
@@ -750,6 +889,7 @@ M.S.M.P/
 - ✅ **Input Validation** - Server-side sanitization
 - ✅ **Attempt Limiting** - 3 OTP tries max
 - ✅ **Password Hashing** - bcrypt for admin
+- ✅ **Docker Isolation** - Container security
 
 ---
 
@@ -779,4 +919,3 @@ MIT License - Free to use, modify, and distribute.
 ---
 
 **Built with ❤️ for the Penrose Assessment | October 2025**
-

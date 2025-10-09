@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: msmp-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - CLIENT_URL=http://localhost:5173
+      - TELCO_PROVIDER=${TELCO_PROVIDER:-Vodacom}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Password123!}
+      - EASYSENDSMS_API_KEY=${EASYSENDSMS_API_KEY}
+      - EASYSENDSMS_SENDER_ID=${EASYSENDSMS_SENDER_ID}
+      - SMS_ENABLED=${SMS_ENABLED:-false}
+    volumes:
+      - ./server/src:/app/src  # Hot reload for development
+      - /app/node_modules      # Prevent overwriting container node_modules
+    networks:
+      - msmp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: npm run dev  # Use nodemon for hot reload
+
+  # Frontend SPA
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5000
+    container_name: msmp-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - msmp-network
+    restart: unless-stopped
+
+networks:
+  msmp-network:
+    driver: bridge
