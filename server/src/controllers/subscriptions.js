@@ -1,6 +1,6 @@
-const Subscription = require('../models/subscription');
-const Transaction = require('../models/transaction');
-const Service = require('../models/service');
+const Subscription = require('../models/Subscription');
+const Transaction = require('../models/Transaction');
+const Service = require('../models/Service');
 const { createTelcoProvider, getProviderFromMSISDN } = require('../config/telco.config');
 
 let io; // Socket.IO instance for real-time updates

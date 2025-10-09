@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Service = require('../src/models/service');
+const Service = require('../src/models/Service');
 require('dotenv').config();
 
 const services = [

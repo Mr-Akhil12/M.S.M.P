@@ -1,4 +1,4 @@
-const Transaction = require('../models/transaction');
+const Transaction = require('../models/Transaction');
 
 /**
  * Get paginated transaction history for authenticated user

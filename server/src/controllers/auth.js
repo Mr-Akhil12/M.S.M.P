@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const User = require('../models/User');
 const otpService = require('../utils/otpService');
 const tokenService = require('../utils/tokenService');
 const smsService = require('../services/smsService');

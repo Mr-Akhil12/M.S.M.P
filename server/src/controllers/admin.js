@@ -1,7 +1,7 @@
-const User = require('../models/user'); 
-const Subscription = require('../models/subscription');
-const Transaction = require('../models/transaction');
-const Service = require('../models/service');
+const User = require('../models/User'); 
+const Subscription = require('../models/Subscription');
+const Transaction = require('../models/Transaction');
+const Service = require('../models/Service');
 
 /**
  * Get platform statistics (total users, subscriptions, revenue)
