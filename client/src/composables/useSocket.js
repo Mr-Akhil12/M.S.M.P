@@ -1,59 +1,54 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { io } from 'socket.io-client'
 import { useAuthStore } from '../stores/auth'
-import { useSubscriptionsStore } from '../stores/subscriptions'
+
+let socket = ref(null)
+let isConnected = ref(false)
 
 export function useSocket() {
   const authStore = useAuthStore()
-  const subscriptionsStore = useSubscriptionsStore()
-  const socket = ref(null)
-  const isConnected = ref(false)
 
-  const connect = () => {
-    if (!authStore.token) return
+  onMounted(() => {
+    // Determine Socket.IO URL based on environment
+    const socketUrl = import.meta.env.PROD 
+      ? 'https://m-s-m-p.onrender.com'  // Production
+      : 'http://localhost:5000'         // Local/Docker
 
-    socket.value = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-      auth: { token: authStore.token }
+    console.log('🔌 [Socket] Connecting to:', socketUrl)
+
+    socket.value = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+      auth: {
+        token: authStore.token
+      }
     })
 
     socket.value.on('connect', () => {
+      console.log('✅ [Socket] Connected:', socket.value.id)
       isConnected.value = true
     })
 
     socket.value.on('disconnect', () => {
+      console.log('❌ [Socket] Disconnected')
       isConnected.value = false
     })
 
-    // Listen for real-time subscription updates
-    socket.value.on('subscription:created', () => {
-      subscriptionsStore.fetchSubscriptions()
-    })
-
-    socket.value.on('subscription:cancelled', () => {
-      subscriptionsStore.fetchSubscriptions()
-    })
-  }
-
-  const disconnect = () => {
-    if (socket.value) {
-      socket.value.disconnect()
-      socket.value = null
+    socket.value.on('connect_error', (error) => {
+      console.error('❌ [Socket] Connection error:', error)
       isConnected.value = false
-    }
-  }
-
-  onMounted(() => {
-    connect()
+    })
   })
 
   onUnmounted(() => {
-    disconnect()
+    if (socket.value) {
+      console.log('🔌 [Socket] Disconnecting...')
+      socket.value.disconnect()
+    }
   })
 
   return {
     socket,
-    isConnected,
-    connect,
-    disconnect
+    isConnected
   }
 }
