@@ -43,6 +43,14 @@ export function useSocket() {
       isConnected.value = true
     })
 
+    socketInstance.on('authenticated', (data) => {
+      console.log('🔐 [Socket] Authenticated as user:', data.userId)
+    })
+
+    socketInstance.on('authentication_error', (data) => {
+      console.error('❌ [Socket] Authentication failed:', data.message)
+    })
+
     socketInstance.on('disconnect', (reason) => {
       console.log('❌ [Socket] Disconnected:', reason)
       isConnected.value = false
@@ -56,11 +64,6 @@ export function useSocket() {
     socketInstance.on('reconnect', (attemptNumber) => {
       console.log('🔄 [Socket] Reconnected after', attemptNumber, 'attempts')
       isConnected.value = true
-    })
-
-    // Listen for all events (debugging)
-    socketInstance.onAny((eventName, ...args) => {
-      console.log(`📡 [Socket] Event received: ${eventName}`, args)
     })
   }
 

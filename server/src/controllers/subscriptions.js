@@ -65,32 +65,34 @@ const subscribe = async (req, res) => {
     await subscription.save();
     await transaction.save();
     
-    // Populate transaction with service details for socket emission
+    // Populate transaction with service details
     await transaction.populate('serviceId');
     
-    // Emit real-time updates
+    // Get io instance
+    const io = req.app.get('io');
+    
     if (io) {
-      const userIdString = userId.toString(); 
+      const userIdString = userId.toString();
       
+      // Emit real-time updates
       io.to(userIdString).emit('subscription:created', { 
         userId: userIdString, 
-        subscription,
-        transaction 
+        subscription: subscription.toObject(),
+        transaction: transaction.toObject()
       });
       
-      // Emit separate transaction event
       io.to(userIdString).emit('transaction:created', { 
         userId: userIdString,
-        transaction
+        transaction: transaction.toObject()
       });
       
-      console.log(`[Socket.IO] Emitted events to room: ${userIdString}`);
+      console.log('✅ [Socket.IO] Emitted subscription:created & transaction:created');
     }
-    
-    res.status(201).json({ 
-      subscription, 
-      transaction, 
-      telcoTransactionId: chargeResult.transactionId 
+
+    res.status(201).json({
+      message: 'Subscribed successfully',
+      subscription,
+      transaction
     });
   } catch (error) {
     console.error('[SUBSCRIPTION] Error:', error.message);
@@ -130,25 +132,32 @@ const unsubscribe = async (req, res) => {
     // Populate transaction with service details
     await transaction.populate('serviceId');
     
-    // Emit real-time updates
+    // Get io instance
+    const io = req.app.get('io');
+    
     if (io) {
-      const userIdString = userId.toString(); 
+      const userIdString = userId.toString();
       
+      // Emit real-time updates
       io.to(userIdString).emit('subscription:cancelled', { 
         userId: userIdString, 
-        subscription,
-        transaction 
+        subscription: subscription.toObject(),
+        transaction: transaction.toObject()
       });
       
       io.to(userIdString).emit('transaction:created', { 
         userId: userIdString,
-        transaction
+        transaction: transaction.toObject()
       });
       
-      console.log(`[Socket.IO] Emitted cancellation events to room: ${userIdString}`);
+      console.log('✅ [Socket.IO] Emitted subscription:cancelled & transaction:created');
     }
-    
-    res.json({ message: 'Unsubscribed successfully', transaction });
+
+    res.status(200).json({
+      message: 'Unsubscribed successfully',
+      subscription,
+      transaction
+    });
   } catch (error) {
     console.error('[SUBSCRIPTION] Unsubscribe error:', error.message);
     res.status(500).json({ message: 'Unsubscription failed' });

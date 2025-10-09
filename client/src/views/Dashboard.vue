@@ -214,7 +214,9 @@ onMounted(async () => {
   ])
 
   // Real-time updates via Socket.IO
-  if (socket.value) {
+  if (socket.value && socket.value.connected) {
+    console.log('🔌 [Dashboard] Socket.IO listeners registered')
+    
     socket.value.on('subscription:created', () => {
       subscriptionsStore.fetchSubscriptions()
       if (transactionListRef.value?.fetchTransactions) {

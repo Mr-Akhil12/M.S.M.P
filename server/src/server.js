@@ -85,15 +85,20 @@ io.on('connection', (socket) => {
       
       // Join user-specific room
       socket.join(userId);
-      console.log(`✅ [Socket.IO] User ${userId} joined room`);
+      console.log('✅ [Socket.IO] User', userId, 'joined room');
       
       // Store userId in socket for later use
       socket.userId = userId;
+      
+      // Send confirmation to client
+      socket.emit('authenticated', { userId });
+      
     } catch (error) {
       console.error('❌ [Socket.IO] JWT verification failed:', error.message);
+      socket.emit('authentication_error', { message: 'Invalid token' });
     }
   } else {
-    console.log('⚠️ [Socket.IO] No token provided in handshake');
+    console.warn('⚠️ [Socket.IO] No token provided in handshake');
   }
 
   socket.on('disconnect', () => {

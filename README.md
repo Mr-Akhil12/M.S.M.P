@@ -44,8 +44,8 @@
 
 **My Render Logins: (Use to view logs from my vercel app)**
 
--  Email: pillayakhil2@gmail.com
--  Password: y#aFX76DiDfLcuF
+- Email: pillayakhil2@gmail.com
+- Password: y#aFX76DiDfLcuF
 
 **Test Credentials:**
 
@@ -265,6 +265,89 @@ The Docker setup includes hot reload for backend development:
 ```bash
 docker-compose up --build frontend
 ```
+
+---
+
+### Multi-Environment Configuration Strategy
+
+**The Problem:** During development, I was constantly switching between Local, Docker, and Production environments. Each time I deployed, I had to manually edit `.env` files to change API URLs, which led to bugs and wasted time. I'd forget to change `http://localhost:5000` to the production URL, or accidentally commit the wrong configuration.
+
+**The Solution:** Environment-specific `.env` files that **automatically** load based on the environment. This was my first time implementing this pattern, and it eliminated all configuration headaches.
+
+---
+
+#### How It Works
+
+The project uses **three separate `.env` files** for the frontend:
+
+```
+client/
+├── .env                  # Docker (Nginx proxy)
+├── .env.development      # Local dev (npm run dev)
+└── .env.production       # Production (npm run build)
+```
+
+**Vite automatically selects the correct file** based on the command:
+
+| Command             | File Loaded        | API URL Used                       |
+| ------------------- | ------------------ | ---------------------------------- |
+| `npm run dev`       | `.env.development` | `http://localhost:5000/api`        |
+| `docker-compose up` | `.env`             | `/api` (Nginx proxy)               |
+| `npm run build`     | `.env.production`  | `https://m-s-m-p.onrender.com/api` |
+
+---
+
+#### Why This Works
+
+1. **Zero Manual Changes** - Switch environments with just the command
+2. **No More Bugs** - Can't accidentally deploy with wrong URL
+3. **Docker-Optimized** - Uses Nginx proxy to eliminate CORS issues
+4. **Git-Safe** - Each file committed with correct values
+
+---
+
+#### Example: The Three Configurations
+
+**Local Development** (`.env.development`):
+
+```env
+# Direct connection to local backend
+VITE_API_URL=http://localhost:5000/api
+```
+
+**Docker** (`.env`):
+
+```env
+# Nginx proxy forwards /api to backend container
+VITE_API_URL=/api
+```
+
+**Production** (`.env.production`):
+
+```env
+# Vercel → Render (full URL required)
+VITE_API_URL=https://m-s-m-p.onrender.com/api
+```
+
+---
+
+#### The Result
+
+Before this approach, my workflow was:
+
+1. Edit `.env` → change URL
+2. Test locally
+3. Edit `.env` again → change back
+4. Deploy
+5. Realize I forgot to change it → redeploy
+
+Now it's just:
+
+1. `npm run dev` for local testing
+2. `docker-compose up` to verify Docker build
+3. `git push` to deploy (Vercel uses `.env.production` automatically)
+
+**No configuration changes. No bugs. No wasted time.** This pattern is now my standard approach for all multi-environment projects.
 
 ---
 

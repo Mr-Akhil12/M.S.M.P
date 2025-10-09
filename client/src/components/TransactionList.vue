@@ -136,53 +136,45 @@ const getStatusClass = (status) => {
 
 // Socket.IO event listeners
 const setupSocketListeners = () => {
-  if (!socket.value) {
-    console.log('⚠️ Socket not available for transaction listeners')
-    return
-  }
+  if (!socket.value) return
 
-  console.log('🔌 Setting up transaction socket listeners')
+  console.log('🔌 [TransactionList] Setting up listeners')
 
   // Listen for new transactions
-  socket.value.on('transaction:created', (data) => {
-    console.log('💰 Transaction created event received:', data)
+  socket.value.on('transaction:created', () => {
+    console.log('💰 [TransactionList] Transaction created - refreshing')
     fetchTransactions()
   })
 
   // Listen to subscription events
-  socket.value.on('subscription:created', (data) => {
-    console.log('🔄 Subscription created - refreshing transactions')
+  socket.value.on('subscription:created', () => {
+    console.log('✅ [TransactionList] Subscription created - refreshing')
     fetchTransactions()
   })
 
-  socket.value.on('subscription:cancelled', (data) => {
-    console.log('🔄 Subscription cancelled - refreshing transactions')
+  socket.value.on('subscription:cancelled', () => {
+    console.log('❌ [TransactionList] Subscription cancelled - refreshing')
     fetchTransactions()
   })
 }
 
 const cleanupSocketListeners = () => {
   if (!socket.value) return
-
-  console.log('🧹 Cleaning up transaction socket listeners')
   socket.value.off('transaction:created')
   socket.value.off('subscription:created')
   socket.value.off('subscription:cancelled')
 }
 
-// Watch for socket connection (only setup once when connected)
+// Watch for socket connection
 watch(isConnected, (connected) => {
   if (connected) {
-    console.log('✅ Socket connected - setting up listeners')
     setupSocketListeners()
   } else {
-    console.log('❌ Socket disconnected - cleaning up listeners')
     cleanupSocketListeners()
   }
 }, { immediate: true })
 
 onMounted(() => {
-  console.log('📊 TransactionList mounted')
   fetchTransactions()
   
   // Setup listeners if already connected
@@ -192,7 +184,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  console.log('👋 TransactionList unmounting')
   cleanupSocketListeners()
 })
 
