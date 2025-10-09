@@ -139,11 +139,15 @@ npm run dev
 ```bash
 git clone https://github.com/Mr-Akhil12/M.S.M.P.git
 cd M.S.M.P
+docker-compose up
 ```
 
-**2. Create Environment File**
+**That's it!** Open http://localhost:5173 🎉
+If you have any issues, most likely your env file might not be correct
 
-Configure `.env` in project root:
+**2. Check The Environment File**
+
+Check `.env` in project root:
 
 ```env
 # Database (MongoDB Atlas)

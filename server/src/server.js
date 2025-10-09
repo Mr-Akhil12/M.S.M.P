@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const connectDB = require('./config/database');
 const tokenService = require('./utils/tokenService');
 const errorHandler = require('./middleware/errorHandler');
+const mongoose = require('mongoose');
 
 const app = express();
 const server = createServer(app);
@@ -99,23 +100,22 @@ io.on('connection', (socket) => {
 // Make io available to routes
 app.set('io', io);
 
+// Health check (BEFORE routes, no /api prefix)
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/subscriptions', require('./routes/subscriptions'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/admin', require('./routes/admin'));
-
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    allowedOrigins: allowedOrigins,
-    trustProxy: app.get('trust proxy')
-  });
-});
 
 // 404 handler
 app.use((req, res) => {

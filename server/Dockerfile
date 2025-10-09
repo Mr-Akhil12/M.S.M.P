@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies (dev + prod for nodemon)
-RUN npm ci
+# Install dependencies + curl for health check
+RUN npm ci && apk add --no-cache curl
 
 # Copy application source
 COPY . .
@@ -19,9 +19,9 @@ COPY . .
 # Expose backend port
 EXPOSE 5000
 
-# Health check endpoint
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:5000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
+# Health check using curl (better IPv4/IPv6 handling)
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=5 \
+    CMD curl -f http://localhost:5000/health || exit 1
 
 # Start with nodemon for hot reload
 CMD ["npm", "run", "dev"]

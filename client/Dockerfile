@@ -16,7 +16,7 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build production bundle
+# Build production bundle (IMPORTANT: Check if this succeeds)
 RUN npm run build
 
 # Stage 2: Serve with Nginx
@@ -31,5 +31,9 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Expose HTTP port
 EXPOSE 80
 
-# Start nginx
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+
+# Start nginx (foreground mode)
 CMD ["nginx", "-g", "daemon off;"]
