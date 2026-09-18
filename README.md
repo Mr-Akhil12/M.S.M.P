@@ -45,16 +45,15 @@
 - The render backend is a bit slow on initial response (Free Tier)
 - Request otp 1/2 times, wait a minute and then request again
 
-**My Render Logins: (Use to view logs from my vercel app)**
+**Demo access (no live credentials in this README):**
 
-- Email: pillayakhil2@gmail.com
-- Password: y#aFX76DiDfLcuF
+Use your own Render dashboard if you deploy the backend. For local/demo testing:
 
 **Test Credentials:**
 
-- 📱 MSISDN: Any valid SA number (27XXXXXXXXX)
-- 🔑 OTP: Check [backend logs](https://dashboard.render.com/) (test mode)
-- 🔐 Admin: `Password123!`
+- 📱 MSISDN: Any valid SA number (`27XXXXXXXXX`)
+- 🔑 OTP: Check your local server console / backend logs when `SMS_ENABLED=false` (test mode)
+- 🔐 Admin: set via `ADMIN_PASSWORD` in your private `.env` (never commit real values)
 
 ---
 
@@ -90,16 +89,16 @@ npm install
 Configure `server/.env`:
 
 ```env
-MONGODB_URI=mongodb+srv://TestUser:Tester123@cluster0.hjxnabk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-JWT_SECRET=0e935731a2da39d0f0ee61cd4e87acbedcaf95521e34c731ed8142c2c94157f7dde53a03ec0d03d0083be2f0575a5260927804df4756dbed28e1f9761cb5a4b5
+MONGODB_URI=YOUR_MONGODB_URI
+JWT_SECRET=YOUR_JWT_SECRET
 PORT=5000
 CLIENT_URL=http://localhost:5173
 # Production URL (secondary - uncomment if testing deployed version)
 # CLIENT_URL=https://m-s-m-p.vercel.app
 TELCO_PROVIDER=Vodacom
-ADMIN_PASSWORD=Password123!
-EASYSENDSMS_API_KEY=ro4vfk8lhyl482hc7d2713mhjno4bkml
-EASYSENDSMS_SENDER_ID=27678659396
+ADMIN_PASSWORD=YOUR_ADMIN_PASSWORD
+EASYSENDSMS_API_KEY=YOUR_EASYSENDSMS_API_KEY
+EASYSENDSMS_SENDER_ID=YOUR_EASYSENDSMS_SENDER_ID
 SMS_ENABLED=true
 NODE_ENV=development
 ```
@@ -154,20 +153,20 @@ Check `.env` in project root:
 
 ```env
 # Database (MongoDB Atlas)
-MONGODB_URI=MONGODB_URI=mongodb+srv://TestUser:Tester123@cluster0.hjxnabk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=YOUR_MONGODB_URI
 
 # JWT Secret
-JWT_SECRET=0e935731a2da39d0f0ee61cd4e87acbedcaf95521e34c731ed8142c2c94157f7dde53a03ec0d03d0083be2f0575a5260927804df4756dbed28e1f9761cb5a4b5
+JWT_SECRET=YOUR_JWT_SECRET
 
 # Telco Provider
 TELCO_PROVIDER=Vodacom
 
 # Admin Access
-ADMIN_PASSWORD=Password123!
+ADMIN_PASSWORD=YOUR_ADMIN_PASSWORD
 
 # SMS Configuration
-EASYSENDSMS_API_KEY=ro4vfk8lhyl482hc7d2713mhjno4bkml
-EASYSENDSMS_SENDER_ID=27678659396
+EASYSENDSMS_API_KEY=YOUR_EASYSENDSMS_API_KEY
+EASYSENDSMS_SENDER_ID=YOUR_EASYSENDSMS_SENDER_ID
 SMS_ENABLED=true
 ```
 
@@ -804,7 +803,7 @@ POST /api/admin/verify-password
 Content-Type: application/json
 
 {
-  "password": "Password123!"
+  "password": "YOUR_ADMIN_PASSWORD"
 }
 ```
 
@@ -1002,8 +1001,8 @@ M.S.M.P/
 **Akhil Pillay**
 
 - GitHub: [@Mr-Akhil12](https://github.com/Mr-Akhil12)
-- Email: [pillayakhil2@gmail.com](mailto:pillayakhil2@gmail.com)
-- Phone: 067 865 9396
+- GitHub Issues: use the repository for contact
+- Contact: via GitHub
 
 ---
 
